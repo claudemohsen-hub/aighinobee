@@ -14,4 +14,4 @@ if (inStock) {
         else { console.log("ناموجود است")
             }
 console.log(document.getElementById("title"))
-document.getElementById("title").innerText="عسل آیگینوبی-عسل عناب"
+document.getElementById("title").innerText="عسل آیگینوبی-عسل عناب"##
