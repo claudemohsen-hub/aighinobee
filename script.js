@@ -11,8 +11,13 @@ showProduct("عسل عناب")
 if (inStock) {   
     console.log("موجود است") 
     }
-        else { console.log("ناموجود است")
+        else { console.log("ن   اموجود است")
             }
 console.log(document.getElementById("title"))
 document.getElementById("myButton").addEventListener("click", function() {
 document.getElementById("title").innerText="خوش آمدید به آیگینوبی؛ فروشگاه عسل طبیعی"})
+let products=["عسل عناب","عسل کنار","عسل زرشک"]
+console.log(products[1])
+for  (let i=0;i < products.length; i++) {
+    console.log(products[i])
+}
