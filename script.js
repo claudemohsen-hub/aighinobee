@@ -18,6 +18,9 @@ document.getElementById("myButton").addEventListener("click", function() {
 document.getElementById("title").innerText="خوش آمدید به آیگینوبی؛ فروشگاه عسل طبیعی"})
 let products=["عسل عناب","عسل کنار","عسل زرشک"]
 console.log(products[1])
-for  (let i=0;i < products.length; i++) {
-    console.log(products[i])
+
+let productListHtml=""
+for (let i=0;i < products.length; i++) {
+    productListHtml=productListHtml +  "<p>" + products[i]+ "</p>"
 }
+document.getElementById("productList").innerHTML=productListHtml
