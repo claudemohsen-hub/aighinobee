@@ -41,3 +41,16 @@ console.log(honeyList[0])
 console.log(honeyList[0].name)
 console.log(honeyList[1].price)
 
+let cart=[]
+
+function addToCart(name) {
+    cart.push(name)
+    console.log(cart)
+}
+
+let cardsHtml=""
+for (let i = 0; i < honeyList.length; i++) {
+    let status = honeyList[i].inStock ? "<p>موجود است</p>" : "<p>ناموجود است</p>"
+    cardsHtml=cardsHtml + "<div class='card'><h3>" + honeyList[i].name +"</h3><p>" + honeyList[i].price + "تومان </p>" + status + "<button onclick=\"addToCart('" + honeyList[i].name + "')\">افزودن به سبد خرید</button></div>"
+}
+document.getElementById("productList").innerHTML=cardsHtml
