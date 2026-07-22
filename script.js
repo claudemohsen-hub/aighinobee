@@ -65,9 +65,16 @@ function getTotalPrice() {
 function showCart() {
     let cartHtml=""
     for (let i=0; i < cart.length; i++) {
-        cartHtml=cartHtml + "<p>" + cart[i].name + " — " + cart[i].price +"تومان</p>"
+        cartHtml=cartHtml + "<p>" + cart[i].name + " — " + cart[i].price +"تومان <button onclick=\"removeFromCart(" + i + ")\">حذف از سبد خرید</button></p>"
     }
     document.getElementById("cartList").innerHTML=cartHtml
+}
+
+function removeFromCart(index){
+    cart.splice(index, 1)
+    document.getElementById("cartCount").innerText="سبد خرید:" + cart.length
+    document.getElementById("cartTotal").innerText="جمع:" + getTotalPrice() + "تومان"
+    showCart()
 }
 
 let cardsHtml=""
