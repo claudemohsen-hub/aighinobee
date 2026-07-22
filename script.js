@@ -48,6 +48,7 @@ function addToCart(index) {
     cart.push(product)
     document.getElementById("cartCount").innerText ="سبد خرید: " +cart.length
     document.getElementById("cartTotal").innerText ="جمع: " + getTotalPrice() + " تومان"
+    showCart()
     console.log(cart)
 }
 
@@ -60,9 +61,19 @@ function getTotalPrice() {
     return total
 }
 
+
+function showCart() {
+    let cartHtml=""
+    for (let i=0; i < cart.length; i++) {
+        cartHtml=cartHtml + "<p>" + cart[i].name + " — " + cart[i].price +"تومان</p>"
+    }
+    document.getElementById("cartList").innerHTML=cartHtml
+}
+
 let cardsHtml=""
 for (let i = 0; i < honeyList.length; i++) {
     let status = honeyList[i].inStock ? "<p>موجود است</p>" : "<p>ناموجود است</p>"
     cardsHtml=cardsHtml + "<div class='card'><h3>" + honeyList[i].name +"</h3><p>" + honeyList[i].price + "تومان </p>" + status + "<button onclick=\"addToCart(" + i + ")\">افزودن به سبد خرید</button></div>"
 }
 document.getElementById("productList").innerHTML=cardsHtml
+
