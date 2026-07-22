@@ -47,7 +47,17 @@ function addToCart(index) {
     let product=honeyList[index]
     cart.push(product)
     document.getElementById("cartCount").innerText ="سبد خرید: " +cart.length
+    document.getElementById("cartTotal").innerText ="جمع: " + getTotalPrice() + " تومان"
     console.log(cart)
+}
+
+
+function getTotalPrice() {
+    let total=0
+    for (let i=0;i<cart.length; i++) {
+        total=total +cart[i].price
+    }
+    return total
 }
 
 let cardsHtml=""
