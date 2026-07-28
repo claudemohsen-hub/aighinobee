@@ -82,6 +82,10 @@ function removeFromCart(index){
     showCart()
 }
 
+document.getElementById("cartCount").innerText="سبد خرید" + cart.length
+document.getElementById("cartTotal").innerText="جمع: " + getTotalPrice() + "تومان"
+showCart()
+
 let cardsHtml=""
 for (let i = 0; i < honeyList.length; i++) {
     let status = honeyList[i].inStock ? "<p>موجود است</p>" : "<p>ناموجود است</p>"
@@ -97,3 +101,7 @@ function clearCart() {
     showCart()
 }
 
+document.getElementById("contactForm").addEventListener("submit",function(event) {
+    event.preventDefault()
+    console.log("فرم ارسال شد")
+})
