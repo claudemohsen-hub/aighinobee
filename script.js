@@ -1,3 +1,4 @@
+console.log("TEST JS");
 let productName = "عسل طبیعی"
 console.log(productName)
 let price = 150000
@@ -17,17 +18,11 @@ console.log(document.getElementById("title"))
 document.getElementById("myButton").addEventListener("click", function() {
 document.getElementById("title").innerText="خوش آمدید به آیگینوبی؛ فروشگاه عسل طبیعی"})
 let products=["عسل عناب","عسل کنار","عسل زرشک"]
-console.log(products[1])
-
-let productListHtml = ""
-for (let i=0;i < products.length; i++) {
-    productListHtml=productListHtml +  "<p>" + products[i]+ "</p>"
-}
-document.getElementById("productList").innerHTML=productListHtml
+console.log(products[1])    
 
 let honey = {
     name: "عسل عناب",
-    price: "200000",
+    price: 200000,
     inStock: true
 }
 console.log(honey.price)
@@ -101,7 +96,19 @@ function clearCart() {
     showCart()
 }
 
-document.getElementById("contactForm").addEventListener("submit",function(event) {
-    event.preventDefault()
-    console.log("فرم ارسال شد")
-})
+document.getElementById("contactForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    console.log("دکمه ارسال زده شد");
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const message = document.getElementById("message").value;
+
+    console.log(name);
+    console.log(email);
+    console.log(message);
+
+    alert("پیام شما ثبت شد");
+});
+
