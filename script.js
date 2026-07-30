@@ -108,7 +108,10 @@ document.getElementById("contactForm").addEventListener("submit", function(event
     console.log(name);
     console.log(email);
     console.log(message);
-
+    if (name=== "") {
+        alert("فیلدها رو یره پر کن")
+        return
+    }
     alert("پیام شما ثبت شد");
 });
 
