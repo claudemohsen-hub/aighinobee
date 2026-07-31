@@ -96,6 +96,12 @@ function clearCart() {
     showCart()
 }
 
+async function getUsers() {
+    let response = await fetch("https://jsonplaceholder.typicode.com/users")
+    let data = await response.json()
+    alert("تعداد کاربرها: " + data.length)
+}
+
 document.getElementById("contactForm").addEventListener("submit", function(event) {
     event.preventDefault();
 
