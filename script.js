@@ -84,7 +84,7 @@ showCart()
 let cardsHtml=""
 for (let i = 0; i < honeyList.length; i++) {
     let status = honeyList[i].inStock ? "<p>موجود است</p>" : "<p>ناموجود است</p>"
-    cardsHtml=cardsHtml + "<div class='bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition'><h3>" + honeyList[i].name +"</h3><p>" + honeyList[i].price + "تومان </p>" + status + "<button onclick=\"addToCart(" + i + ")\">افزودن به سبد خرید</button></div>"
+    cardsHtml=cardsHtml + "<div class='bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition'><h3>" + honeyList[i].name +"</h3><p>" + honeyList[i].price + "تومان </p>" + status + "<button class='bg-honey text-white px-4 py-2 rounded hover:bg-amber-900 transition' onclick=\"addToCart(" + i + ")\">افزودن به سبد خرید</button></div>"
 }
 document.getElementById("productList").innerHTML=cardsHtml
 
