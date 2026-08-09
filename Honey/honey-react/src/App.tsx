@@ -1,11 +1,24 @@
-function ProductCard(props: { name: string; price: number}){
+import {useState} from 'react'
+function Counter() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div>
+      <p>عدد: {count}</p>
+      <button onClick={() => setCount(count + 1)}>افزایش</button>
+    </div>
+  )
+}
+
+function ProductCard(props: { name: string; price: number; onAdd: () => void }) {  
   return(
     <div>
-      <h3>{props.name}</h3>
+      <h3>{props.name}</h3> 
      <p className="flex justify-center gap-1">
   <span>{props.price.toLocaleString('fa-IR')}</span>
   <span> تومان</span>
 </p>
+<button onClick={props.onAdd}>افزودن به سبد خرید</button>
     </div>
   )
 }
@@ -20,12 +33,24 @@ function App() {
       { name: "عسل کنار", price: 1240000},
       { name: "عسل زرشک", price: 2234000}
   ]
+  const [cart, setCart] = useState<{ name: string; price: number}[]>([])
   return (
     <div>
       <h1> سلام از React</h1>
-      {products.map((product) => (
-  <ProductCard name={product.name} price={product.price} />
-))}
+      <Counter />
+      <div>
+  <p>تعداد اقلام سبد: {cart.length}</p>
+  {cart.map((item, index) => (
+    <p key={index}>{item.name} — {item.price.toLocaleString('fa-IR')} تومان</p>
+  ))}
+</div>
+      {products.map((product, index) => (
+  <ProductCard 
+  key={index}
+  name={product.name} 
+  price={product.price}
+  onAdd={() => setCart([...cart, product])} />
+      ))}
     </div>
   )
 }
