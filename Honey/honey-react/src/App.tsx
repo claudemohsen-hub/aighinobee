@@ -1,14 +1,5 @@
 import {useState} from 'react'
-function Counter() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <div>
-      <p>عدد: {count}</p>
-      <button onClick={() => setCount(count + 1)}>افزایش</button>
-    </div>
-  )
-}
 
 function ProductCard(props: { name: string; price: number; onAdd: () => void }) {  
   return(
@@ -34,14 +25,18 @@ function App() {
       { name: "عسل زرشک", price: 2234000}
   ]
   const [cart, setCart] = useState<{ name: string; price: number}[]>([])
+  function removeFromCart(indexToRemove: number) {
+    setCart(cart.filter((item, index) => index !==indexToRemove))
+  }
   return (
     <div>
       <h1> سلام از React</h1>
-      <Counter />
       <div>
   <p>تعداد اقلام سبد: {cart.length}</p>
   {cart.map((item, index) => (
-    <p key={index}>{item.name} — {item.price.toLocaleString('fa-IR')} تومان</p>
+    <p key={index}>{item.name} — {item.price.toLocaleString('fa-IR')} تومان
+    <button onClick={() => removeFromCart(index)}>حذف</button>
+    </p>
   ))}
 </div>
       {products.map((product, index) => (
