@@ -6,8 +6,16 @@
 - **هاست اصلی سایت وانیلا:** iginobee.com (cPanel)
 - **سیستم‌عامل:** Mac Air M5 + Windows (هر دو استفاده می‌شن)
 - **هدف کلی:** یادگیری فرانت‌اند حرفه‌ای، سپس بک‌اند با زبان‌های روز دنیا
-- **سبک تدریس:** فارسی + اصطلاحات تخصصی انگلیسی؛ مربی کد آماده نمی‌ده، فقط هدایت و اصلاح می‌کند؛ هر جلسه با جزوه تمام می‌شود
 - **ریتم فعلی:** ۲-۳ جلسه در روز (وقتی فعاله)، هر جلسه ~۱۵-۲۵ دقیقه
+
+## ⚠️ تغییر مهم در روش تدریس (از جلسه ۵۶ به بعد)
+محسن صراحتاً درخواست کرد روش آموزش به **مدل کاملاً هدایتی (Model 1)** تغییر کند:
+- **هرگز کد کامل آماده ندهیم.** فقط با سوالات گام‌به‌گام و راهنمایی، خودش به جواب برسد.
+- وقتی گیر می‌کند، سوال را ساده‌تر و کوچک‌تر کنیم (نه اینکه جواب را بدهیم).
+- صبور بمانیم؛ حتی اگر چند سوال طول بکشد تا به یک مفهوم برسد.
+- این مدل ترجیح داده شد نسبت به «ترکیبی» و «سریع با کد آماده» چون یادگیری عمیق‌تر برایش مهم‌تر از سرعت است.
+- خودش گفت: اگر این مدل جواب نداد یا خیلی کند/خسته‌کننده بود، خودش اطلاع می‌دهد تا دوباره تنظیم کنیم.
+- **این ترجیح باید در تمام جلسات آینده رعایت شود، حتی اگر پیشرفت کندتر شود.**
 
 ---
 
@@ -22,7 +30,7 @@
 | ۵ | React (Props, State, map, Cart با useState) | ✅ تموم شد |
 | ۶ | Next.js (Routing, Layout, صفحات چندگانه) | ✅ تموم شد |
 | **--- نقشه‌ی اصلی ۱۰۰٪ تکمیل شد در جلسه ۵۲ --- ** | | |
-| ۷ | تثبیت فرانت‌اند (تکمیل واقعی آیگینوبی: عکس محصولات، صفحه جزئیات، سبد کامل، طراحی نهایی) | ⏳ **بعدی — جلسه ۵۳** |
+| ۷ | تثبیت فرانت‌اند (تکمیل واقعی آیگینوبی روی Next.js) | ⏳ **در حال انجام** |
 | ۸ | TypeScript عمیق‌تر | ⏳ |
 | ۹ | Node.js / Next.js API Routes (بک‌اند) | ⏳ |
 | ۱۰ | PostgreSQL + Prisma (دیتابیس) | ⏳ |
@@ -30,103 +38,120 @@
 | ۱۲ | احراز هویت (Login/Auth) | ⏳ |
 | ۱۳ | پرداخت آنلاین | ⏳ |
 
-**تخمین کلی مسیر باقی‌مانده:** ۷۵-۹۵ جلسه (با ریتم فعلی ~۲.۵-۳.۵ ماه، اگر پیوسته انجام شود)
+---
+
+## 📚 جلسه‌ی بعدی: جلسه ۵۶ (نیمه‌کاره مونده، دقیقاً از همینجا ادامه بده)
+
+### موضوع: جدا کردن Client Component برای دکمه‌ی «افزودن به سبد» در صفحه‌ی جزئیات محصول
+
+**زمینه‌ی مسئله:**
+- صفحه‌ی `app/products/[id]/page.tsx` یک تابع `async` است (Server Component) — چون باید `params` را با `await` بگیرد و از `data/products.ts` اطلاعات بخواند.
+- نمی‌توان `useState`/`onClick` (لازم برای دکمه‌ی افزودن به سبد) را مستقیم در یک فایل async/Server اضافه کرد، چون این‌ها فقط در Client Component (با `"use client"` بالای فایل) کار می‌کنند.
+- محسن خودش با راهنمایی به این نتیجه رسید که باید **دکمه را در یک فایل جدا** (با `"use client"`) بسازیم و آن را داخل `page.tsx` استفاده کنیم — این فهم درست بود ✅
+
+**دقیقاً کجا متوقف شدیم:**
+از او سوال شد: «این فایل جدید (فقط برای دکمه‌ی افزودن به سبد) را با چه اسمی، در کدام پوشه بسازیم؟» — او جواب داد `app/products/[id]` (پوشه درست است) ولی هنوز اسم فایل را مشخص نکرده بود (باید با `page.tsx` تداخل نداشته باشد).
+
+**قدم بعدی برای جلسه ۵۶:**
+1. با سوال گام‌به‌گام (نه دادن جواب مستقیم) کمکش کنیم اسم مناسبی مثل `AddToCartButton.tsx` را خودش پیشنهاد بدهد یا بفهمد چرا اسم دلخواه (نه `page.tsx`) اوکی است.
+2. سپس با راهنمایی (نه کد آماده) کمکش کنیم:
+   - در فایل جدید `"use client"` بالای فایل بگذارد
+   - یک Component بسازد که `useState` برای مدیریت سبد (یا حداقل نمایش پیام «اضافه شد») داشته باشد
+   - این Component را داخل `page.tsx` (که Server Component است) import و استفاده کند — مفهوم مهم: **Server Component می‌تواند Client Component را import/render کند، ولی برعکسش مستقیم نه**
+3. تاکید بر فهم "چرا" در هر قدم، نه فقط "چطور"
+
+⚠️ **حیاتی:** طبق تغییر روش تدریس، در این جلسه **کد کامل ندهیم** — فقط سوال و راهنمایی گام‌به‌گام، دقیقاً مثل جلسات ۱۵-۳۴ (JavaScript اولیه) که خودش موفق بود.
 
 ---
 
-## 📚 جلسه‌ی بعدی: جلسه ۵۳
-شروع «مرحله ۱: تثبیت فرانت‌اند» — تکمیل واقعی سایت آیگینوبی روی Next.js (honey-next)
-
----
-
-## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده (جلسات ۱-۵۲)
+## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده (جلسات ۱-۵۵)
 
 ### HTML (جلسات ۱-۶)
 ساختار پایه، تگ‌های معنایی، لیست‌ها، جدول‌ها، فرم‌ها، لینک‌ها، عکس‌ها
 
 ### CSS (جلسات ۷-۱۴)
-سه روش CSS، Flexbox (flex, gap, justify-content, align-items, flex-wrap)، Grid (grid-template-columns/areas)، Responsive (@media)، CSS Variables (:root, var())
+سه روش CSS، Flexbox، Grid، Responsive (@media)، CSS Variables
 
 ### JavaScript (جلسات ۱۵-۳۴)
-- متغیر (let/const)، انواع داده، if/else، function
-- DOM: getElementById، innerText/innerHTML
-- Event: addEventListener
-- Array + Loop + Object + Array of Objects
-- Ternary Operator
-- **سبد خرید کامل:** push/splice، محاسبه جمع قیمت، نمایش/حذف/خالی‌کردن سبد
-- **localStorage:** ذخیره دائمی سبد با JSON.stringify/parse
-- **فرم تماس:** preventDefault، Validation
-- **Fetch + async/await:** کار با API واقعی (jsonplaceholder)
+متغیر/if-else/function، DOM، Event، Array+Loop+Object، Ternary، سبد خرید کامل (push/splice)، localStorage، فرم+Validation، Fetch+async/await
 
 ### Tailwind CSS (جلسات ۳۵-۴۱)
-نصب CDN، Flexbox/Grid با کلاس، Responsive با sm:/md:/lg:، hover:، رنگ سفارشی (tailwind.config → theme.extend.colors)
+نصب CDN، Flexbox/Grid با کلاس، Responsive (sm:/md:/lg:)، hover:، رنگ سفارشی
 
 ### React + TypeScript (جلسات ۴۲-۴۸)
-- پروژه‌ی `honey-react` (Vite + TypeScript)
-- Component، JSX، export default
-- Props (تعریف نوع با TypeScript، مثل `{ name: string; price: number }`)
-- `.map()` برای رندر لیست + قانون `key`
-- useState (شمارنده، سپس سبد خرید کامل با Array)
-- Spread operator (`...cart`) به‌جای mutate مستقیم
-- فیلتر کردن با `.filter()` برای حذف از سبد
-- toLocaleString('fa-IR') برای نمایش صحیح اعداد فارسی
+پروژه‌ی honey-react (Vite)، Component/JSX/Props، `.map()`+key، useState، سبد خرید با Array (spread operator، `.filter()`)، toLocaleString('fa-IR')
 
-### Next.js (جلسات ۴۹-۵۲)
-- پروژه‌ی `honey-next` (App Router, TypeScript, Tailwind از پیش‌فرض)
-- File-based Routing: `app/page.tsx` = `/`, `app/products/page.tsx` = `/products`
-- `layout.tsx`: قالب مشترک با Navbar، `{children}`
-- `lang="fa" dir="rtl"` روی تگ html در layout.tsx
-- `"use client"` برای صفحاتی که useState/onClick دارند
-- ترکیب نهایی: کارت محصول + سبد خرید کامل داخل صفحه‌ی `/products`
+### Next.js پایه (جلسات ۴۹-۵۲)
+پروژه‌ی honey-next (App Router)، File-based Routing، layout.tsx مشترک، RTL در layout، `"use client"`، ترکیب کارت محصول+سبد در `/products`
+
+### Next.js پیشرفته (جلسات ۵۳-۵۵)
+- تصمیم گرفته شد: **honey-next نسخه‌ی نهایی و رسمی است** (وانیلا و React کنار گذاشته شدند، فقط بایگانی)
+- `next/image` + تنظیم `remotePatterns` در `next.config.ts` برای عکس از دامنه‌ی خارجی
+- نکته: تغییر `next.config.ts` نیاز به ری‌استارت کامل سرور دارد (نه فقط ذخیره)
+- **Dynamic Routes:** پوشه با `[id]` → `app/products/[id]/page.tsx`
+- خواندن پارامتر آدرس: `async function ProductDetail({ params }: { params: Promise<{ id: string }> })` + `const { id } = await params`
+- فایل داده‌ی مشترک: `data/products.ts` با `export const honeyList = [...]` شامل id/name/price/image/description
+- پیدا کردن محصول: `honeyList.find((p) => p.id === Number(id))` — نکته‌ی کلیدی: `id` از آدرس همیشه string است، باید Number() شود
+- ناوبری بین صفحات با `<Link href={...}>` به‌جای `<a>` معمولی
+- صفحه‌ی جزئیات محصول کامل شد: عکس + اسم + توضیحات + قیمت
 
 ---
 
-## 🔧 پروژه‌های موجود (چند نسخه از آیگینوبی — باید یکی نهایی انتخاب شود!)
-1. **نسخه‌ی وانیلا (اصلی، آپلودشده روی هاست):** `index.html`, `style.css`, `script.js` — پوشه‌ی Code Learning، آپلود در iginobee.com/honey/
-2. **نسخه‌ی React تمرینی:** پوشه‌ی `honey-react` (Vite) — فقط برای یادگیری، شامل Counter تمرینی (حذف‌شده)، ProductCard، Cart
-3. **نسخه‌ی Next.js (آخرین و نهایی):** پوشه‌ی `honey-next` — دارای layout مشترک، صفحات `/`, `/products`, `/contactus`
+## 🔧 وضعیت پروژه‌ی نهایی (honey-next)
+**صفحات موجود:**
+- `/` (خانه) — ساده
+- `/products` (لیست محصولات) — کارت‌ها + سبد خرید کامل (useState, add/remove, نمایش تعداد و لیست)
+- `/products/[id]` (جزئیات محصول) — عکس/اسم/توضیحات/قیمت؛ **هنوز دکمه‌ی افزودن به سبد ندارد** (کار جلسه‌ی ۵۶)
+- `/contactus` — ساده
 
-⚠️ **نکته‌ی مهم برای جلسه بعد:** باید مشخص شود کدام نسخه ادامه پیدا می‌کند برای سایت واقعی — به احتمال زیاد honey-next چون جدیدترین و کامل‌ترین معماریست.
+**فایل داده‌ی مشترک:** `data/products.ts` (id, name, price, image, description) — منبع واحد برای هر دو صفحه‌ی لیست و جزئیات
+
+**Layout مشترک:** `app/layout.tsx` با Navbar (خانه/محصولات/تماس با ما)، `lang="fa" dir="rtl"`، متادیتای فارسی
+
+**تنظیمات خاص:** `next.config.ts` دارای `images.remotePatterns` برای دامنه‌ی دیجی‌کالا (عکس موقت آنلاین — باید در آینده با عکس واقعی محصولات جایگزین شود)
 
 ---
 
 ## 🌐 گیت‌هاب و همگام‌سازی
 - **Repository:** `github.com/claudemohsen-hub/aighinobee`
-- **push.sh** (Mac، در پوشه‌ی Code Learning):
+- **push.sh** (Mac، در پوشه‌ی Code Learning) — بازسازی شد بعد از حذف تصادفی:
 ```bash
 cd "$(dirname "$0")"
 git add .
 git commit -m "auto update"
 git push
 ```
-اجرا با `./push.sh` (نیاز به `chmod +x push.sh` یک‌بار)
+اجرا با `./push.sh` (نیاز به `chmod +x push.sh` یک‌بار در صورت اجرای اول)
 - **push.bat** (Windows): مسیر `E:\Code Learning`، دابل‌کلیک برای اجرا
-- روتین طلایی: **همیشه قبل از عوض کردن سیستم (Mac↔Windows)، push بزن؛ بعد از اومدن سراغ سیستم دیگه، اول pull بزن**
-- [حادثه‌ی حل‌شده] یک بار اجرای push.sh در پوشه‌ی اشتباه باعث حذف `index.html`/`script.js` از گیت‌هاب شد؛ با `git checkout <commit-qadimi> -- index.html script.js` بازیابی و دوباره push شد
+- روتین طلایی: **همیشه قبل از عوض کردن سیستم، push بزن؛ بعد از اومدن سراغ سیستم دیگه، اول pull بزن، بعد `npm install` (چون node_modules منتقل نمی‌شود)**
+- [حادثه‌ی حل‌شده] یک بار اجرای push.sh در پوشه‌ی اشتباه باعث حذف index.html/script.js از گیت‌هاب شد؛ با `git checkout <commit-qadimi> -- index.html script.js` بازیابی شد
 
 ---
 
 ## ⚠️ الگوهای خطای رایج محسن (برای کمک دقیق‌تر در آینده)
-- فاصله‌ی اضافه یا جاافتاده در کلمات کلیدی (`let`, `const`, `function`)
-- بزرگ/کوچیک بودن حروف (خصوصاً در نام Component های React که باید حرف اول بزرگ باشد؛ و در HTML id ها)
-- اشتباه گرفتن عدد `1`/حرف `l`، در نام کلاس‌های Tailwind (`rounded-lg` نه `rounded-1g`)
+- فاصله‌ی اضافه یا جاافتاده در کلمات کلیدی
+- بزرگ/کوچیک بودن حروف (نام Component های React، HTML id ها، `Image` با I بزرگ)
+- اشتباه گرفتن عدد `1`/حرف `l` در کلاس‌های Tailwind
 - فراموشی بستن پرانتز/آکولاد در `.map()` (الگوی درست: `))}`)
+- گاهی کاراکتر فارسی/عربی تصادفی وسط کد لاتین قاطی می‌شود (مثل `}س` به‌جای `}`) — وقتی خطا می‌گوید یک حرف تنها "تعریف نشده"، این را چک کن
 - کپی/پیست جزئی که باعث تکرار کد یا جا افتادن خط می‌شود
-- نیاز به توضیح "خط به خط" و بسیار ساده برای جا افتادن مفهوم — روش پاسخ‌گویی مناسب: تشریح کامل + مثال ساده قبل از رفتن به سوال بعد
+- نیاز به توضیح "خط به خط" و بسیار ساده برای جا افتادن مفهوم
 
 ---
 
 ## 📝 نکات فنی کلیدی (Cheat sheet سریع)
-- **RTL همیشه اول کار:** در `index.html` وانیلا → `<html lang="fa" dir="rtl">`؛ در Next.js → همین را در `layout.tsx` بگذار
-- **اعداد فارسی درست:** `price.toLocaleString('fa-IR')` – هم رقم فارسی می‌شود هم جهت درست می‌شود
+- **RTL همیشه اول کار:** `<html lang="fa" dir="rtl">` — در وانیلا در `index.html`، در Next.js در `layout.tsx`
+- **اعداد فارسی درست:** `price.toLocaleString('fa-IR')`
 - **صداکردن پروژه‌ها:**
-  - وانیلا: مستقیم باز کردن `index.html` (Live Server، پورت 5500)
+  - وانیلا: مستقیم `index.html` (Live Server، پورت 5500)
   - React (Vite): `cd honey-react && npm run dev` → پورت 5173
   - Next.js: `cd honey-next && npm run dev` → پورت 3000
-- **انتقال پروژه بین سیستم‌ها:** بعد از pull، حتماً یک‌بار `npm install` بزن (چون node_modules منتقل نمی‌شود)
+- **انتقال پروژه بین سیستم‌ها:** بعد از pull، حتماً `npm install`
+- **next.config.ts تغییر کرد؟** سرور را کامل ری‌استارت کن (Ctrl+C سپس `npm run dev`)
+- **Server vs Client Component:** پیش‌فرض همه‌چیز Server Component است (روی سرور رندر می‌شود، سریع‌تر، ولی بدون useState/onClick). فقط با `"use client"` بالای فایل، Component به Client تبدیل می‌شود و می‌تواند تعامل کاربر داشته باشد. **نکته‌ی مهمی که در حال یادگیری است:** یک فایل Server (مثل صفحه‌ی جزئیات محصول با async) نمی‌تواند مستقیم useState داشته باشد؛ باید بخش تعاملی (دکمه) را در یک فایل جدای Client بسازیم و داخل فایل Server ایمپورت/رندر کنیم.
 
 ---
 
-**آخرین آپدیت:** پایان جلسه‌ی ۵۲ (تکمیل کامل نقشه‌ی راه اصلی Next.js developer)
-**وضعیت:** ✅ HTML+CSS+JS+Tailwind+React+Next.js همگی تکمیل شدند؛ سبد خرید کامل در Next.js پیاده‌سازی شد
-**بعدی:** جلسه ۵۳ — شروع مرحله‌ی توسعه‌یافته: تثبیت فرانت‌اند و تکمیل واقعی سایت آیگینوبی
+**آخرین آپدیت:** پایان جلسه‌ی ۵۵ / شروع جلسه‌ی ۵۶ (نیمه‌کاره)
+**وضعیت:** صفحه‌ی جزئیات محصول کامل است ولی بدون دکمه‌ی افزودن به سبد؛ در حال یادگیری مفهوم Server/Client Component separation
+**بعدی:** جلسه ۵۶ را از نقطه‌ی «چه اسمی برای فایل Client Component جدید بگذاریم» با روش کاملاً هدایتی (بدون کد آماده) ادامه بده
