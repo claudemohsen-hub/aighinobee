@@ -1,10 +1,12 @@
 "use client"
+import Image from "next/image"
 
 import { useState } from "react"
 
-function ProductCard(props: { name: string; price: number; onAdd: () => void }) {
+function ProductCard(props: { name: string; price: number; image: string; onAdd: () => void }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition">
+     <Image src={props.image} alt={props.name} width={300} height={200} className="rounded" />
       <h3>{props.name}</h3>
       <p className="flex justify-center gap-1">
         <span>{props.price.toLocaleString('fa-IR')}</span>
@@ -22,10 +24,10 @@ function ProductCard(props: { name: string; price: number; onAdd: () => void }) 
 
 export default function Products() {
   const honeyList = [
-    { name: "عسل عناب", price: 1239000 },
-    { name: "عسل کنار", price: 1240000 },
-    { name: "عسل زرشک", price: 2234000 }
-  ]
+  { name: "عسل عناب", price: 1239000, image: "https://dkstatics-public.digikala.com/digikala-products/92408d5e99b7424116cc2efdf176a9526986754e_1649869838.jpg" },
+  { name: "عسل کنار", price: 1240000, image: "https://dkstatics-public.digikala.com/digikala-products/92408d5e99b7424116cc2efdf176a9526986754e_1649869838.jpg" },
+  { name: "عسل زرشک", price: 2234000, image: "https://dkstatics-public.digikala.com/digikala-products/92408d5e99b7424116cc2efdf176a9526986754e_1649869838.jpg" }
+]
 
   const [cart, setCart] = useState<{ name: string; price: number }[]>([])
 
@@ -53,6 +55,7 @@ export default function Products() {
             key={index}
             name={product.name}
             price={product.price}
+            image={product.image}
             onAdd={() => setCart([...cart, product])}
           />
         ))}
