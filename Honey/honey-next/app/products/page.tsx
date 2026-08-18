@@ -3,6 +3,7 @@ import { honeyList } from "@/data/products"
 import Link from "next/link"
 import Image from "next/image"
 
+
 import { useState } from "react"
 
 function ProductCard(props: { id: number; name: string; price: number; image: string; onAdd: () => void }) {
