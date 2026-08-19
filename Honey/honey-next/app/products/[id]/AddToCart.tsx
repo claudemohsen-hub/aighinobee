@@ -1,9 +1,11 @@
 "use client"
 
+
 function AddToCart (){
     return(
-<div>افزودن به سبد خرید</div>
+<button>افزودن به سبد خرید</button>
     )
 }
+
 
 export default AddToCart
