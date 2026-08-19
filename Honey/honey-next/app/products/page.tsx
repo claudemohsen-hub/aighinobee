@@ -2,24 +2,23 @@
 import { honeyList } from "@/data/products"
 import Link from "next/link"
 import Image from "next/image"
-
-
-import { useState } from "react"
+import { useContext } from "react"
+import { CartContextValue } from "../../Context/CartContext"
 
 function ProductCard(props: { id: number; name: string; price: number; image: string; onAdd: () => void }) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition">
-     <Image src={props.image} alt={props.name} width={300} height={200} className="rounded" />
-      <Link href={`/products/${props.id}`}>
-  <h3>{props.name}</h3>
-</Link>
-      <p className="flex justify-center gap-1">
+    <div className="bg-white rounded-xl shadow-md p-5 hover:shadow-xl transition flex flex-col items-center text-center">
+      <Image src={props.image} alt={props.name} width={220} height={160} className="rounded-lg object-cover" />
+      <Link href={`/products/${props.id}`} className="mt-3">
+        <h3 className="text-lg font-bold text-amber-900 hover:underline">{props.name}</h3>
+      </Link>
+      <p className="flex justify-center gap-1 mt-2 text-gray-700">
         <span>{props.price.toLocaleString('fa-IR')}</span>
         <span>تومان</span>
       </p>
       <button
         onClick={props.onAdd}
-        className="bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-900 transition"
+        className="bg-amber-800 text-white px-5 py-2 rounded-lg mt-3 hover:bg-amber-900 transition w-full"
       >
         افزودن به سبد خرید
       </button>
@@ -28,29 +27,31 @@ function ProductCard(props: { id: number; name: string; price: number; image: st
 }
 
 export default function Products() {
-  
-
-  const [cart, setCart] = useState<{ name: string; price: number }[]>([])
+  const { cart, setCart } = useContext(CartContextValue)
 
   function removeFromCart(indexToRemove: number) {
-    setCart(cart.filter((item, index) => index !== indexToRemove))
+    setCart(cart.filter((item: any, index: number) => index !== indexToRemove))
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">محصولات</h1>
+    <div className="p-6 max-w-6xl mx-auto">
 
-      <div className="mb-6">
-        <p>تعداد اقلام سبد: {cart.length}</p>
-        {cart.map((item, index) => (
-          <p key={index}>
-            {item.name} — {item.price.toLocaleString('fa-IR')} تومان
-            <button onClick={() => removeFromCart(index)}>حذف</button>
-          </p>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
+        <p className="font-semibold mb-2">تعداد اقلام سبد: {cart.length}</p>
+        {cart.map((item: { name: string; price: number }, index: number) => (
+          <div key={index} className="flex justify-between items-center py-1 border-b border-amber-100 last:border-0">
+            <span>{item.name} — {item.price.toLocaleString('fa-IR')} تومان</span>
+            <button
+              onClick={() => removeFromCart(index)}
+              className="text-red-600 hover:underline text-sm"
+            >
+              حذف
+            </button>
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {honeyList.map((product, index) => (
           <ProductCard
             key={index}

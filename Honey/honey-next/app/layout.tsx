@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Link from "next/link";
+import CartContext from "../Context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,20 +19,23 @@ export const metadata: Metadata = {
   description: "فروش عسل طبیعی و خالص",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="fa" dir="rtl"
+      lang="fa"
+      dir="rtl"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-  <nav className="flex gap-6 justify-end bg-amber-800 text-white p-4">
-    <a href="/">خانه</a>
-    <a href="/products">محصولات</a>
-    <a href="/contactus">تماس با ما</a>
-  </nav>
-  {children}
-</body>
+        <CartContext>
+          <nav className="flex gap-6 justify-end bg-amber-800 text-white p-4">
+            <Link href="/">خانه</Link>
+            <Link href="/products">محصولات</Link>
+            <Link href="/contactus">تماس با ما</Link>
+          </nav>
+          {children}
+        </CartContext>
+      </body>
     </html>
   );
 }
