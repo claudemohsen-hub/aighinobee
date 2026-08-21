@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import CartContext from "../Context/CartContext";
+import CartCount from "./CartCount"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/">خانه</Link>
             <Link href="/products">محصولات</Link>
             <Link href="/contactus">تماس با ما</Link>
+            <CartCount/>
           </nav>
           {children}
         </CartContext>

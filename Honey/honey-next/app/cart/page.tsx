@@ -2,6 +2,7 @@
 
 import { useContext } from "react"
 import { CartContextValue } from "../../Context/CartContext"
+import Link from "next/link"
 
 export default function CartPage() {
     const { cart, setCart } = useContext(CartContextValue)
@@ -55,15 +56,19 @@ console.log("CART PAGE DATA:", cart)
                 )
             )}
 
-            {cart.length > 0 && (
-                <div className="mt-5 font-bold">
-                    جمع کل:
-                    {" "}
-                    {total.toLocaleString("fa-IR")}
-                    {" "}
-                    تومان
-                </div>
-            )}
+          {cart.length > 0 && (
+    <div className="mt-5">
+        <p className="font-bold mb-3">
+            جمع کل: {total.toLocaleString("fa-IR")} تومان
+        </p>
+        <Link
+            href="/checkout"
+            className="bg-amber-800 text-white px-6 py-3 rounded-lg inline-block hover:bg-amber-900 transition"
+        >
+            تسویه‌حساب
+        </Link>
+    </div>
+)}
         </div>
     )
 }
