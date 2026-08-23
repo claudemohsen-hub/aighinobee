@@ -20,30 +20,30 @@ export default function Checkout() {
                 پرداخت
             </h1>
 
+            <div className="max-w-md">
+                <textarea
+                    placeholder="آدرس کامل خود را وارد کنید"
+                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+                    rows={3}
+                />
 
-            <textarea
-             placeholder="آدرس کامل خود را وارد کنید"
-             className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-             rows={3}
-              />
+                <input
+                    type="tel"
+                    placeholder="شماره موبایل (مثال: 09123456789)"
+                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+                />
 
-            <input
-                type="tel"
-                placeholder="شماره موبایل (مثال: 09123456789)"
-                className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-            />
+                <input
+                    type="text"
+                    placeholder="کد پستی"
+                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+                />
 
-            <input
-                type="text"
-                placeholder="کد پستی"
-                className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-            />
-
-          <textarea
-                 placeholder="توضیحات اختیاری"
-                 className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-/>
-
+                <textarea
+                    placeholder="توضیحات اختیاری"
+                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+                />
+            </div>
 
             {cart.length === 0 && (
                 <p>سبد خرید خالی است</p>
