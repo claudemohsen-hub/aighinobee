@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div>
       <div className="bg-amber-800 text-white text-center py-20 px-6">
-        <h1 className="text-4xl font-bold mb-4">آیگینوبی</h1>
+        <h1 className="text-4xl  font-bold mb-4">آیگینوبی</h1>
         <p className="text-lg max-w-xl mx-auto mb-6">
           عسل طبیعی و خالص، مستقیم از کندوهای کوهستانی به خانه‌ی شما
         </p>
@@ -21,7 +21,7 @@ export default function Home() {
       </div>
 
       <div className="p-6 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-amber-900 text-center">
+        <h2 className="text-2xl font-bold mb-6 text-amber-200 text-center">
           محصولات پرفروش
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
