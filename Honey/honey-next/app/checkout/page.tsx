@@ -1,17 +1,20 @@
 "use client"
 
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { CartContextValue } from "../../Context/CartContext"
+import { provincesAndCities } from "../../data/iranLocations"
 
 export default function Checkout() {
     const { cart, setCart } = useContext(CartContextValue)
+    const [selectedProvince, setSelectedProvince] = useState("")
 
     const total = cart.reduce(
-        (sum: number, item: { price: number }) => sum + item.price,
-        0
-    )
+    (sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity),
+    0
+)
 
-    const shippingPrice = cart.length * 550000
+    const totalQuantity = cart.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0)
+    const shippingPrice = totalQuantity * 55000
     const finalTotal = shippingPrice + total
 
     return (
@@ -19,8 +22,33 @@ export default function Checkout() {
             <h1 className="text-2xl font-bold mb-4">
                 پرداخت
             </h1>
-
             <div className="max-w-md">
+<select
+    value={selectedProvince}
+    onChange={(e) => setSelectedProvince(e.target.value)}
+    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+>
+    <option value="">انتخاب استان</option>
+    {Object.keys(provincesAndCities).map((province) => (
+        <option key={province} value={province}>
+            {province}
+        </option>
+    ))}
+</select>
+
+<select
+    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
+    disabled={!selectedProvince}
+>
+    <option value="">انتخاب شهر</option>
+    {selectedProvince &&
+        provincesAndCities[selectedProvince].map((city) => (
+            <option key={city} value={city}>
+                {city}
+            </option>
+        ))}
+</select>
+            
                 <textarea
                     placeholder="آدرس کامل خود را وارد کنید"
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
@@ -48,23 +76,22 @@ export default function Checkout() {
             {cart.length === 0 && (
                 <p>سبد خرید خالی است</p>
             )}
-
-            {cart.map(
-                (
-                    item: { name: string; price: number },
-                    index: number
-                ) => (
-                    <div
-                        key={index}
-                        className="flex justify-between items-center border-b py-3"
-                    >
-                        <span>{item.name}</span>
-                        <span>
-                            {item.price.toLocaleString("fa-IR")} تومان
-                        </span>
-                    </div>
-                )
-            )}
+{cart.map(
+    (
+        item: { name: string; price: number; quantity: number },
+        index: number
+    ) => (
+        <div
+            key={index}
+            className="flex justify-between items-center border-b py-3"
+        >
+            <span>{item.name} ({item.quantity})</span>
+            <span>
+                {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
+            </span>
+        </div>
+    )
+)}
 
             {cart.length > 0 && (
                 <div>

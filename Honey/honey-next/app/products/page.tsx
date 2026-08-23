@@ -26,8 +26,9 @@ function ProductCard(props: { id: number; name: string; price: number; image: st
   )
 }
 
-export default function Products() {
-  const { cart, setCart } = useContext(CartContextValue)
+export default function Products() 
+{
+  const { cart, setCart, addToCart } = useContext(CartContextValue)
 
   function removeFromCart(indexToRemove: number) {
     setCart(cart.filter((item: any, index: number) => index !== indexToRemove))
@@ -37,10 +38,10 @@ export default function Products() {
     <div className="p-6 max-w-6xl mx-auto">
 
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
-        <p className="font-semibold mb-2">تعداد اقلام سبد: {cart.length}</p>
+        <p className="font-semibold text-black mb-2">تعداد اقلام سبد: {cart.length}</p>
         {cart.map((item: { name: string; price: number }, index: number) => (
-          <div key={index} className="flex justify-between items-center py-1 border-b border-amber-100 last:border-0">
-            <span>{item.name} — {item.price.toLocaleString('fa-IR')} تومان</span>
+          <div key={index} className="flex justify-between items-center py-1 border-b border-amber-100 text-black last:border-0">
+           <span>{item.name} ({item.quantity}) — {(item.price * item.quantity).toLocaleString('fa-IR')} تومان</span>
             <button
               onClick={() => removeFromCart(index)}
               className="text-red-600 hover:underline text-sm"
@@ -59,7 +60,7 @@ export default function Products() {
             name={product.name}
             price={product.price}
             image={product.image}
-            onAdd={() => setCart([...cart, product])}
+            onAdd={() => addToCart(product)}
           />
         ))}
       </div>

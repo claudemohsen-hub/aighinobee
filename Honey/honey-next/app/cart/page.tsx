@@ -17,9 +17,10 @@ export default function CartPage() {
     }
 
     const total = cart.reduce(
-        (sum: number, item: { price: number }) => sum + item.price,
-        0
-    )
+    (sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity),
+    0
+)
+    
 console.log("CART PAGE DATA:", cart)
     return (
         <div className="p-6">
@@ -40,11 +41,8 @@ console.log("CART PAGE DATA:", cart)
                         key={index}
                         className="flex justify-between items-center border-b py-3"
                     >
-                        <span>{item.name}</span>
-
-                        <span>
-                            {item.price.toLocaleString("fa-IR")} تومان
-                        </span>
+                        <span>{item.name} ({item.quantity})</span>
+                        <span>{(item.price * item.quantity).toLocaleString("fa-IR")} تومان</span>
 
                         <button
                             onClick={() => removeFromCart(index)}

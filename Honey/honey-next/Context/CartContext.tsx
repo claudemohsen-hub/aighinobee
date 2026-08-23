@@ -2,8 +2,6 @@
 
 import { useState, createContext, useEffect } from "react"
 
-console.log("MY CART CONTEXT LOADED")
-
 export const CartContextValue = createContext<any>(null)
 
 function CartContext({ children }: { children: React.ReactNode }) {
@@ -11,10 +9,8 @@ function CartContext({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<any[]>([])
     const [loaded, setLoaded] = useState(false)
 
-
     // خواندن اولیه
     useEffect(() => {
-
         const savedCart = localStorage.getItem("cart")
 
         if (savedCart) {
@@ -22,31 +18,33 @@ function CartContext({ children }: { children: React.ReactNode }) {
         }
 
         setLoaded(true)
-
     }, [])
-
-
 
     // ذخیره فقط بعد از خواندن اولیه
     useEffect(() => {
-
         if (!loaded) return
 
-        localStorage.setItem(
-            "cart",
-            JSON.stringify(cart)
-        )
-
-        console.log("SAVED CART:", cart)
-
+        localStorage.setItem("cart", JSON.stringify(cart))
     }, [cart, loaded])
 
+    function addToCart(product: { id: number; name: string; price: number }) {
+        const existing = cart.find((item: any) => item.id === product.id)
 
-    console.log("PROVIDER RENDER CART:", cart)
-
+        if (existing) {
+            setCart(
+                cart.map((item: any) =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                )
+            )
+        } else {
+            setCart([...cart, { ...product, quantity: 1 }])
+        }
+    }
 
     return (
-        <CartContextValue.Provider value={{ cart, setCart }}>
+        <CartContextValue.Provider value={{ cart, setCart, addToCart }}>
             {children}
         </CartContextValue.Provider>
     )
