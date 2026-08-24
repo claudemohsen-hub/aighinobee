@@ -17,6 +17,17 @@ export default function Checkout() {
     const shippingPrice = totalQuantity * 55000
     const finalTotal = shippingPrice + total
 
+    async function handlePayment() {
+    const response = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart, total: finalTotal }),
+    })
+
+    const result = await response.json()
+    alert(result.message)
+}
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4">
@@ -106,7 +117,7 @@ export default function Checkout() {
                     </div>
 
                     <button
-                        onClick={() => alert("سفارش شما ثبت شد")}
+                        onClick={handlePayment}
                         className="block bg-green-700 text-white px-6 py-3 rounded-lg mt-4 hover:bg-green-800 transition"
                     >
                         پرداخت
