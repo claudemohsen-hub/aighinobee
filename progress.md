@@ -3,155 +3,207 @@
 ## پروفایل یادگیرنده
 - **نام:** محسن عامنش
 - **پروژه:** آیگینوبی (فروش عسل) — هدف نهایی: سایت واقعی و حرفه‌ای برای فروش عمومی
-- **هاست سایت وانیلای قدیمی:** iginobee.com (طراحی حرفه‌ای مشکی/طلایی از قبل — الگوی رنگی که برای Next.js هم استفاده شد)
-- **سیستم‌عامل:** Mac Air M5 + Windows (هر دو استفاده می‌شن، گاهی merge conflict پیش میاد)
+- **سیستم‌عامل:** Mac Air M5 + Windows (هر دو استفاده می‌شن)
 - **هدف کلی:** یادگیری فرانت‌اند حرفه‌ای، سپس بک‌اند با زبان‌های روز دنیا
 - **ریتم فعلی:** جلسات پیوسته و طولانی؛ گاهی چند جلسه در یک نشست
 
-## ⚠️ روش تدریس فعلی (تعادل، نه کاملاً هدایتی)
-محسن اولش خواسته بود مدل کاملاً هدایتی (بدون کد آماده) باشد، ولی بعداً (جلسه ۵۷ به بعد) گفت خیلی کند شده و درخواست «تعادل» کرد:
-- **برای مفاهیم جدید و منطقی/تصمیمات معماری:** سوال بپرس، بگذار خودش فکر کند و به جواب برسد (مثل قبل).
-- **برای سینتکس، الگوهای تکراری، و کدهای پیچیده/تخصصی (مثل Context API، select های وابسته):** مستقیم‌تر کد بده و توضیح بده چرا، به‌خصوص وقتی محسن صراحتاً می‌گوید «خودت بگو» یا «نمی‌دونم».
-- وقتی محسن می‌گوید کد را خودش نمی‌نویسد و می‌ترسد اشتباه کند، فایل کامل را بساز و بده دانلود کند.
-- این تعادل باید در جلسات آینده هم رعایت شود.
+## ⚠️ روش تدریس فعلی (تعادل)
+- **برای مفاهیم جدید و منطقی/تصمیمات معماری:** سوال بپرس، بگذار خودش فکر کند.
+- **برای سینتکس، الگوهای تکراری، و کدهای پیچیده/تخصصی:** مستقیم‌تر کد بده و توضیح بده چرا، به‌خصوص وقتی محسن می‌گوید «خودت بگو» یا «نمی‌دونم».
+- وقتی محسن می‌گوید کد را خودش نمی‌نویسد، فایل کامل را بساز و بده دانلود کند.
+
+## ⚠️⚠️ قانون طلایی جدید (حتماً اول هر جلسه رعایت شود!)
+**همیشه در ابتدای هر جلسه از محسن بپرس: «الان روی Mac هستی یا Windows؟»**
+چون او مدام بین این دو سیستم جابه‌جا می‌شود و این باعث مشکلات مکرر (نصب‌های ناقص، فایل‌های گم‌شده) شده است.
+
+### چک‌لیست اجباری هر بار عوض کردن سیستم (Mac ↔ Windows):
+1. `git pull`
+2. `npm install` (چون `node_modules` هیچ‌وقت منتقل نمی‌شود)
+3. **چک کن فایل `.env` وجود دارد** — این فایل به‌خاطر `.gitignore` هرگز با گیت منتقل نمی‌شود! باید **دستی** روی هر سیستم جدید دوباره ساخته شود با محتوای:
+   ```
+   DATABASE_URL="postgres://0668edc26f6ba816336bd34afd74286539969369847f3c07d68f41a1d07aad47:sk_qY3WrH2Lvi4M2YFQJgMop@db.prisma.io:5432/postgres?sslmode=require"
+   ```
+4. اگر خطای مربوط به `app/generated/prisma` آمد: `npx prisma generate`
+5. اگر با نصب Prisma نسخه‌ی جدید (`8.0.0-rc`) مواجه شدی که دستورهای متفاوتی دارد، حتماً نسخه‌ی پایدار را نصب کن: `npm install prisma@7 --save-dev` یا مطمئن شو `package.json` نسخه‌ی درست را مشخص کرده
 
 ---
 
-## 🗺 نقشه‌ی راه کامل (اصلی + توسعه‌یافته)
+## 🗺 نقشه‌ی راه کامل
 
 | مرحله | موضوع | وضعیت |
 |-------|--------|--------|
-| ۱-۶ | HTML, CSS, JavaScript, Tailwind, React, Next.js پایه | ✅ تموم شد (جلسه ۵۲) |
-| ۷ | تثبیت فرانت‌اند (تکمیل واقعی آیگینوبی روی Next.js) | ✅ **عملاً تکمیل شد تا جلسه ۶۷** |
-| ۸ | TypeScript عمیق‌تر | ⏳ **بعدی** |
-| ۹ | Node.js / Next.js API Routes (بک‌اند) | ⏳ (اینجا API درگاه پرداخت وصل می‌شود) |
-| ۱۰ | PostgreSQL + Prisma (دیتابیس) | ⏳ |
-| ۱۱ | دیپلوی روی Vercel | ⏳ |
-| ۱۲ | احراز هویت (Login/Auth) | ⏳ |
-| ۱۳ | پرداخت آنلاین واقعی (API که محسن از قبل دارد) | ⏳ |
+| ۱-۷ | HTML تا تثبیت کامل فرانت‌اند | ✅ تموم شد (تا جلسه ۶۷) |
+| ۸ | شروع بک‌اند: Next.js API Routes | ✅ **تموم شد (جلسه ۶۸-۶۹)** |
+| ۹ | دیتابیس واقعی (Prisma + PostgreSQL) | ✅ **تموم شد (جلسه ۷۰-۷۱)** |
+| ۱۰ | پنل ادمین ساده برای دیدن سفارش‌ها | ⏳ **بعدی (پیشنهادی)** |
+| ۱۱ | اتصال API درگاه پرداخت واقعی محسن | ⏳ |
+| ۱۲ | دیپلوی روی Vercel | ⏳ |
+| ۱۳ | احراز هویت (Login/Auth) | ⏳ |
 
-**تصمیم صریح محسن در پایان جلسه ۶۷:** فرانت‌اند کافی است، برویم سراغ بک‌اند. جلسه‌ی بعد باید با TypeScript عمیق‌تر یا مستقیماً API Routes شروع شود.
-
----
-
-## 📚 جلسه‌ی بعدی: جلسه ۶۸
-شروع «مرحله ۸: TypeScript عمیق‌تر» یا مستقیم «مرحله ۹: Next.js API Routes» — با محسن هماهنگ کن کدام ترجیح دارد در ابتدای جلسه.
-
-**نکته‌ی حیاتی برای جلسه‌ی بعد:** محسن یک **API درگاه پرداخت واقعی** دارد که می‌خواهد به دکمه‌ی «پرداخت» در `/checkout` وصل شود. این کار باید از طریق **Next.js API Route** (نه مستقیم در کد Client) انجام شود، چون کلید امنیتی نباید در مرورگر باشد. این احتمالاً اولین کاربرد عملی بخش بک‌اند خواهد بود.
+**در پایان جلسه ۷۱ از محسن پرسیده شد کدام را ترجیح می‌دهد: پنل ادمین یا اتصال درگاه پرداخت. جواب هنوز دریافت نشده — این باید اولین سوال جلسه‌ی بعد باشد (بعد از سوال Mac/Windows).**
 
 ---
 
-## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده (جلسات ۱-۶۷)
-
-### HTML/CSS/JS پایه (جلسات ۱-۳۴)
-ساختار، Flexbox/Grid/Responsive، سبد خرید کامل با JS خام، localStorage، فرم+Validation، Fetch+async/await
-
-### Tailwind (جلسات ۳۵-۴۱)
-Flexbox/Grid با کلاس، Responsive، hover، رنگ سفارشی
-
-### React + TypeScript پایه (جلسات ۴۲-۴۸)
-Component/Props/useState، سبد خرید با Array در React
-
-### Next.js پایه (جلسات ۴۹-۵۲)
-File-based Routing، layout.tsx مشترک، RTL، ترکیب نهایی
-
-### Next.js پیشرفته و معماری واقعی (جلسات ۵۳-۵۷)
-- تصمیم: **honey-next نسخه‌ی نهایی و رسمی** پروژه
-- next/image + remotePatterns
-- **Dynamic Routes** (`[id]`)
-- فایل داده‌ی مشترک `data/products.ts`
-- **Context API** برای اشتراک سبد خرید بین صفحات (`Context/CartContext.tsx`) — شامل Provider، useContext
-- جدا کردن Server Component (صفحه‌ی async) از Client Component (دکمه‌ی تعاملی مثل `AddToCart.tsx`)
-- ذخیره‌ی سبد در `localStorage` با دو `useEffect` (خواندن اولیه + ذخیره‌ی بعدی)
-- درس بزرگ دیباگ: بررسی حساسیت حروف بزرگ/کوچیک در نام پوشه‌ها (`Context` vs `context`)، اهمیت import صحیح `globals.css` در layout.tsx (وگرنه کل Tailwind از کار می‌افتد)
-
-### تثبیت کامل فرانت‌اند (جلسات ۵۸-۶۷)
-- **صفحه‌ی مستقل `/cart`**: نمایش کامل سبد با `reduce` برای جمع کل
-- **صفحه‌ی اصلی (Home)** بازطراحی شد: Hero + محصولات پرفروش با `.slice(0, 3)`
-- **صفحه‌ی `/checkout`**: فیلد آدرس (textarea)، شماره موبایل (`type="tel"`)، کد پستی، توضیحات اختیاری، محدود کردن عرض فیلدها با `max-w-md`
-- **محاسبه‌ی هزینه‌ی پستی وابسته به تعداد**: در ابتدا `cart.length * 550000` (ریال) — بعداً به تومان تصحیح شد (`* 55000`) و سپس با معرفی quantity به `totalQuantity * 55000` تغییر کرد
-- **لینک Navbar به سبد خرید**: Component جدا `CartCount.tsx` که تعداد را نشان می‌دهد (`سبد خرید (عدد)`)
-- **دکمه‌ی پرداخت موقت** با `alert()` — منتظر بک‌اند واقعی
-- **فونت سراسری Vazirmatn**: `import { Vazirmatn } from "next/font/google"` در layout.tsx
-- **بازطراحی رنگ کامل سایت**: پس‌زمینه‌ی سرمه‌ای تیره (`#0f172a`) + متن روشن (`#f1f5f9`) در `globals.css`، هماهنگ با طراحی حرفه‌ای سایت وانیلای قبلی روی iginobee.com؛ حذف تنظیمات قدیمی متناقض (`@media prefers-color-scheme: dark` و `font-family: Arial`)
-- **صفحه‌ی `/contactus` کامل شد**: شماره، ایمیل، لینک‌های واتساپ/روبیکا/ایتا/تلگرام (با `<a href>` نه `<Link>` چون سایت خارجی)، فرم تیکت کامل (نام، موبایل، پیام، دکمه‌ی ارسال با alert)
-- **حل Merge Conflict واقعی بین Mac و Windows** — یادگیری عملی `<<<<<<< HEAD` / `=======` / `>>>>>>>` و روند `git add . / commit / push`
-- **مفهوم Quantity در سبد خرید** (بزرگ‌ترین دستاورد منطقی این بخش): به‌جای افزودن آیتم تکراری، تابع جدید `addToCart` در CartContext چک می‌کند آیا محصول با همان `id` وجود دارد؛ اگر بله فقط `quantity` را زیاد می‌کند، وگرنه آیتم جدید با `quantity: 1` اضافه می‌شود. این تابع اکنون از طریق Context در دسترس همه صفحات است (`{ cart, setCart, addToCart }`)
-- تمام محاسبات (`total`, `shippingPrice`, `finalTotal`) به‌روزرسانی شدند تا `quantity` را لحاظ کنند
-- **لیست کشویی وابسته استان → شهر**: فایل داده‌ی کامل ۳۱ استان ایران (`data/iranLocations.ts`)، دو `<select>` با `useState` که دومی با `disabled={!selectedProvince}` کنترل می‌شود
+## 📚 جلسه‌ی بعدی: جلسه ۷۲
+۱. اول بپرس: Mac یا Windows؟
+۲. چک‌لیست بالا را در صورت نیاز اجرا کن (خصوصاً `.env` و `npx prisma generate`)
+۳. بپرس: پنل ادمین (دیدن سفارش‌ها) یا اتصال درگاه پرداخت واقعی؟
+۴. ادامه بده
 
 ---
 
-## 🔧 وضعیت نهایی پروژه (honey-next) تا جلسه ۶۷
+## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده (جلسات ۱-۷۱)
 
-**صفحات:**
-- `/` — Hero + محصولات پرفروش
-- `/products` — لیست کامل، سبد خرید نمایش داده‌شده با quantity
-- `/products/[id]` — جزئیات محصول + دکمه AddToCart (Client Component جدا)
-- `/cart` — سبد کامل با quantity، جمع کل، دکمه تسویه‌حساب
-- `/checkout` — فرم کامل (استان/شهر با select وابسته، آدرس، موبایل، کد پستی، توضیحات)، جمع کل + هزینه پستی + جمع نهایی، دکمه پرداخت موقت
-- `/contactus` — اطلاعات تماس + شبکه‌های اجتماعی + فرم تیکت
+### HTML/CSS/JS/Tailwind/React/Next.js پایه (جلسات ۱-۵۲)
+تکمیل کامل — به فایل قبلی progress مراجعه شود اگر جزئیات لازم است.
 
-**فایل‌های کلیدی:**
-- `Context/CartContext.tsx` — Context با addToCart، quantity logic، localStorage sync
-- `data/products.ts` — لیست محصولات (id, name, price, image, description)
-- `data/iranLocations.ts` — استان‌ها و شهرهای ایران
-- `app/layout.tsx` — Navbar مشترک، فونت Vazirmatn، CartContext Provider، CartCount
-- `app/globals.css` — رنگ سراسری تیره + طلایی
+### تثبیت فرانت‌اند (جلسات ۵۳-۶۷)
+- Next.js نهایی (`honey-next`)، Dynamic Routes، Context API برای سبد خرید مشترک
+- localStorage sync، صفحات کامل: خانه، محصولات، جزئیات، سبد، checkout، تماس با ما
+- **Quantity در سبد خرید**: به‌جای آیتم تکراری، `addToCart` چک می‌کند آیا محصول با همان `id` وجود دارد، اگر بله فقط `quantity` زیاد می‌شود
+- لیست کشویی وابسته استان→شهر (۳۱ استان ایران، `data/iranLocations.ts`)
+- طراحی یکپارچه: پس‌زمینه سرمه‌ای تیره (`#0f172a`)، فونت Vazirmatn، رنگ طلایی (`amber`)
+- حل Merge Conflict واقعی بین Mac/Windows
 
-**هویت بصری:** رنگ سرمه‌ای تیره (`#0f172a`) + طلایی/کهربایی (`amber`)، فونت Vazirmatn، هماهنگ با برندینگ قدیمی سایت وانیلا
+### شروع بک‌اند: API Routes (جلسات ۶۸-۶۹)
+- `app/api/hello/route.ts` — اولین API با `GET`
+- `app/api/products/route.ts` — برگرداندن `honeyList` واقعی با `Response.json()`
+- `app/api/order/route.ts` — دریافت سفارش با `POST`، خواندن با `request.json()`
+- اتصال فرانت به بک با `fetch`:
+  ```typescript
+  const response = await fetch("/api/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({...}),
+  })
+  const result = await response.json()
+  ```
+- نکته‌ی پورت تکراری: اگر سرور قبلی باز بماند، سرور جدید روی پورت دیگر (۳۰۰۱) بالا می‌آید؛ باید با `kill PID` بسته شود
+
+### دیتابیس واقعی با Prisma (جلسات ۷۰-۷۱) — پیچیده‌ترین بخش تا الان
+- نصب: `npm install prisma --save-dev` → `npx prisma init`
+- **مهم:** حتماً نسخه‌ی پایدار Prisma نصب شود؛ نسخه‌ی `8.0.0-rc` دستورهای متفاوت و ناقص دارد و باعث سردرگمی شد
+- ساخت دیتابیس ابری رایگان: `npx create-db` (باید حتماً با لینک Claim، ثبت رسمی شود وگرنه پاک می‌شود)
+- `DATABASE_URL` در `.env` ذخیره می‌شود — این فایل **همیشه** در `.gitignore` است و **هرگز با git منتقل نمی‌شود**؛ باید روی هر سیستم جدید دستی دوباره ساخته شود (این یک منبع بزرگ سردرگمی و اتلاف وقت بود در این پروژه)
+- مدل در `prisma/schema.prisma`:
+  ```prisma
+  model Order {
+    id          Int      @id @default(autoincrement())
+    phone       String
+    address     String
+    province    String
+    city        String
+    postalCode  String
+    description String?
+    items       Json
+    totalPrice  Int
+    createdAt   DateTime @default(now())
+  }
+  ```
+- اعمال به دیتابیس واقعی: `npx prisma migrate dev --name add_order_model`
+- ساخت کلاینت: `npx prisma generate` (باید بعد از هر انتقال بین سیستم‌ها یا اگر پوشه `app/generated/prisma` گم/خراب شود، دوباره اجرا شود)
+- **نسخه‌ی جدید Prisma نیاز به Adapter صریح دارد** (فرق مهم با نسخه‌های قدیمی‌تر که فقط `new PrismaClient()` کافی بود):
+  ```typescript
+  // lib/prisma.ts
+  import { PrismaClient } from "../app/generated/prisma/client"
+  import { PrismaPg } from "@prisma/adapter-pg"
+
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  const prisma = new PrismaClient({ adapter })
+  export default prisma
+  ```
+  نیاز به نصب: `npm install @prisma/adapter-pg` و `npm install @prisma/client`
+- اتصال نهایی API به دیتابیس:
+  ```typescript
+  import prisma from "../../../lib/prisma"
+  const order = await prisma.order.create({ data: { phone, address, ... } })
+  ```
+- **نتیجه‌ی موفق:** فرم checkout واقعاً سفارش را در دیتابیس PostgreSQL ابری ذخیره می‌کند و پیام «سفارش شما با موفقیت ثبت شد» را برمی‌گرداند
+
+### دستاورد مهم فرم checkout در این مرحله
+تمام فیلدهای فرم (استان، شهر، آدرس، موبایل، کد پستی، توضیحات) به `useState` وصل شدند و در `handlePayment` همراه با `cart` و `finalTotal` به API ارسال می‌شوند.
+
+---
+
+## 🔧 وضعیت نهایی پروژه (honey-next) تا جلسه ۷۱
+
+**صفحات:** `/`, `/products`, `/products/[id]`, `/cart`, `/checkout` (فرم کامل + اتصال دیتابیس واقعی)، `/contactus`
+
+**API Routes:**
+- `app/api/hello/route.ts` — تست ساده
+- `app/api/products/route.ts` — GET لیست محصولات
+- `app/api/order/route.ts` — POST ثبت سفارش در دیتابیس واقعی
+
+**فایل‌های کلیدی جدید:**
+- `lib/prisma.ts` — اتصال Prisma با Adapter
+- `prisma/schema.prisma` — مدل Order
+- `.env` — شامل `DATABASE_URL` (هرگز با git منتقل نمی‌شود، باید دستی روی هر سیستم ساخته شود)
+
+**دیتابیس:** PostgreSQL ابری رایگان روی Prisma (claimed و امن)
 
 ---
 
 ## 🌐 گیت‌هاب و همگام‌سازی
 - **Repository:** `github.com/claudemohsen-hub/aighinobee`
-- **push.sh** (Mac) / **push.bat** (Windows) در ریشه‌ی `Code Learning` — کل پروژه (شامل هر سه نسخه‌ی سایت) با هم فرستاده می‌شود
-- **قدم‌های Push/Commit مستقیم از VS Code** هم یاد گرفته شد: پنل Source Control (آیکون شاخه‌های درخت) → نوشتن پیام Commit → دکمه‌ی Commit → Sync/Push
-- روتین طلایی: همیشه قبل از عوض کردن سیستم push بزن؛ بعد از آمدن به سیستم دیگر اول pull بزن، بعد `npm install`
-- **[حادثه‌ی حل‌شده جدید] Merge Conflict واقعی**: وقتی هر دو سیستم (Mac/Windows) تغییرات ناهماهنگ داشتند، Git علامت‌های `<<<<<<< HEAD`/`=======`/`>>>>>>>` گذاشت؛ با انتخاب دستی نسخه‌ی درست (جایگزینی کامل فایل) و سپس `git add . / commit / push` حل شد
+- push.sh (Mac) / push.bat (Windows) در ریشه‌ی `Code Learning`
+- **[حادثه‌ی حل‌شده] Merge Conflict واقعی بین Mac/Windows** — با انتخاب دستی نسخه‌ی درست حل شد
+- **آخرین وضعیت شناخته‌شده:** محسن آخرین بار از روی Mac پوش زده است (پایان جلسه ۷۱)
 
 ---
 
-## ⚠️ الگوهای خطای رایج محسن (برای کمک دقیق‌تر در آینده)
-- فراموشی `className=` قبل از کلاس‌ها (نوشتن مستقیم `text-2xl ...` بدون attribute)
-- بستن ناقص تگ‌ها (`/>` جا افتاده یا اضافه)
-- تکرار خط‌ها یا جا انداختن یک خط هنگام کپی/ادیت دستی (باعث می‌شود محتوا دوبار نمایش داده شود یا حذف شود)
-- گاهی به‌جای ویرایش یک خط موجود، خط جدید کنارش اضافه می‌کند (نه جایگزینی)
-- سردرگمی بین اسم‌های مشابه (`CartContext` vs `CartCount`)
-- فراموشی ری‌استارت سرور بعد از تغییر فایل‌های سراسری (`next.config.ts`, رنگ Context جدید export شده)
-- گاهی از دستور یا تغییری که چند پیام قبل گفته شده گیج می‌شود و می‌پرسد «این کجاست» — باید با دقت و صبر دوباره مکان دقیق را نشان داد
-- ترجیح می‌دهد وقتی کد پیچیده/تکراری می‌شود، فایل کامل را بگیرد و کپی کند تا خودش هر خط را دستی بسازد
+## ⚠️ الگوهای خطای رایج محسن
+- فراموشی `className=` قبل از کلاس‌ها
+- بستن ناقص تگ‌ها
+- تکرار خط‌ها یا جا انداختن هنگام کپی/ادیت دستی
+- گاهی به‌جای ویرایش خط موجود، خط جدید کنارش اضافه می‌کند
+- سردرگمی بین اسم‌های مشابه فایل‌ها یا مسیرها
+- فراموشی ری‌استارت سرور بعد از تغییر فایل‌های سراسری یا export جدید
+- گاهی فایل اشتباه/قدیمی یا فایل بیرون از پوشه‌ی پروژه را باز می‌کند و فکر می‌کند مشکل از کد است (مثل `Honey/prisma.ts` به‌جای `Honey/honey-next/lib/prisma.ts`)
+- ترجیح می‌دهد وقتی کد پیچیده می‌شود، فایل کامل را بگیرد و کپی کند
 
 ---
 
 ## 📝 نکات فنی کلیدی (Cheat sheet سریع)
 - **RTL:** `<html lang="fa" dir="rtl">` در layout.tsx
 - **اعداد فارسی:** `price.toLocaleString('fa-IR')`
-- **اجرای پروژه:** `cd honey-next && npm run dev` → پورت 3000
-- **بعد از pull روی سیستم جدید:** `npm install`
-- **بعد از تغییر next.config.ts یا export جدید در فایل مشترک:** ری‌استارت کامل سرور (`Ctrl+C` سپس `npm run dev`)؛ گاهی حتی `rm -rf .next` لازم است
-- **Server vs Client Component:** پیش‌فرض Server (بدون useState/onClick)؛ با `"use client"` بالای فایل، Client می‌شود. Server Component می‌تواند Client Component را import/render کند، برعکسش نه.
-- **Context Pattern:**
-  ```tsx
-  export const CartContextValue = createContext<any>(null)
-  function CartContext({ children }) {
-    const [cart, setCart] = useState<any[]>([])
-    function addToCart(product) { /* quantity logic */ }
-    return <CartContextValue.Provider value={{ cart, setCart, addToCart }}>{children}</CartContextValue.Provider>
+- **اجرای پروژه:** `cd honey-next && npm run dev` → پورت 3000 (اگر اشغال بود پورت 3001، باید `kill PID` سرور قبلی زد)
+- **بعد از pull روی سیستم جدید:** `npm install` + بازسازی `.env` + `npx prisma generate`
+- **بعد از تغییر next.config.ts یا export جدید:** ری‌استارت کامل سرور؛ گاهی `rm -rf .next` لازم است
+- **اگر خطای TypeScript روی import عجیب و غریب بود ولی کد واقعاً کار می‌کرد:** `Cmd+Shift+P` → `TypeScript: Restart TS Server`
+- **Server vs Client Component:** پیش‌فرض Server؛ با `"use client"` بالای فایل، Client می‌شود.
+- **API Route ساختار:**
+  ```typescript
+  export async function GET() { return Response.json(data) }
+  export async function POST(request: Request) {
+    const data = await request.json()
+    // ...
+    return Response.json({ success: true })
   }
   ```
-  در هر صفحه: `const { cart, setCart, addToCart } = useContext(CartContextValue)`
-- **واحد پول:** همیشه چک کن آیا عدد ریال است یا تومان قبل از جمع زدن با اعداد دیگر (منبع یک باگ واقعی در این پروژه بود)
-- **رنگ سراسری سایت:** `app/globals.css` → `:root { --background: #0f172a; --foreground: #f1f5f9; }`
-- **فونت سراسری:** `next/font/google` → `Vazirmatn({ subsets: ["arabic"] })` در layout.tsx
+- **fetch از فرانت‌اند:**
+  ```typescript
+  const response = await fetch("/api/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({...}),
+  })
+  const result = await response.json()
+  ```
+- **Prisma با Adapter (نسخه‌ی جدید):**
+  ```typescript
+  import { PrismaClient } from "../app/generated/prisma/client"
+  import { PrismaPg } from "@prisma/adapter-pg"
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+  const prisma = new PrismaClient({ adapter })
+  ```
 
 ---
 
 ## 🔐 یادداشت مهم برای بک‌اند آینده
-محسن یک **کلید/کد API درگاه پرداخت واقعی** دارد (احتمالاً زرین‌پال یا مشابه) که می‌خواهد به دکمه‌ی پرداخت در `/checkout` وصل شود. این باید حتماً از طریق **Next.js API Route** (سمت سرور) انجام شود، نه مستقیم در کد Client-side، چون کلید امنیتی نباید در مرورگر افشا شود. این یکی از اولویت‌های اصلی فاز بک‌اند خواهد بود.
+محسن یک **کلید/کد API درگاه پرداخت واقعی** دارد که می‌خواهد به دکمه‌ی پرداخت در `/checkout` وصل شود، از طریق Next.js API Route (نه Client-side). این یکی از اولویت‌های اصلی است — پرسیده شود آیا این جلسه‌ی بعد یا بعد از پنل ادمین انجام شود.
 
 ---
 
-**آخرین آپدیت:** پایان جلسه‌ی ۶۷
-**وضعیت:** فرانت‌اند سایت آیگینوبی عملاً کامل و حرفه‌ای است — سبد خرید با quantity، checkout با استان/شهر، طراحی یکپارچه‌ی رنگ/فونت
-**بعدی:** جلسه ۶۸ — شروع فاز بک‌اند (TypeScript عمیق‌تر یا مستقیم Next.js API Routes، با اولویت اتصال درگاه پرداخت واقعی)
+**آخرین آپدیت:** پایان جلسه‌ی ۷۱
+**وضعیت:** سیستم کامل فرانت‌اند + بک‌اند + دیتابیس واقعی کار می‌کند؛ سفارش‌ها واقعاً در PostgreSQL ذخیره می‌شوند
+**بعدی:** جلسه ۷۲ — اول بپرس Mac/Windows، بعد بپرس پنل ادمین یا درگاه پرداخت، سپس ادامه بده
