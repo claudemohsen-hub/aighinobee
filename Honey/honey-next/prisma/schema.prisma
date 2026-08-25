@@ -11,3 +11,16 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  phone       String
+  address     String
+  province    String
+  city        String
+  postalCode  String
+  description String?
+  items       Json
+  totalPrice  Int
+  createdAt   DateTime @default(now())
+}
