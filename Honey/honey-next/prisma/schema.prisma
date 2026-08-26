@@ -23,4 +23,7 @@ model Order {
   items       Json
   totalPrice  Int
   createdAt   DateTime @default(now())
+  plate  String
+  floor  String?
+  unit   String?
 }

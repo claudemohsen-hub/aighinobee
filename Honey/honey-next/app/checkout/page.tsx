@@ -10,6 +10,9 @@ export default function Checkout() {
     const [selectedCity, setSelectedCity] = useState("")
     const [phone, setPhone] = useState("")
     const [address, setAddress] = useState("")
+    const [plate, setPlate] = useState("")
+    const [floor, setFloor] = useState("")
+    const [unit, setUnit] = useState("")
     const [postalCode, setPostalCode] = useState("")
     const [description, setDescription] = useState("")
 
@@ -22,7 +25,61 @@ export default function Checkout() {
     const shippingPrice = totalQuantity * 55000
     const finalTotal = shippingPrice + total
 
+    function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
+        setPhone(onlyNumbers)
+    }
+
+    function handlePostalCodeChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
+        setPostalCode(onlyNumbers)
+    }
+
+    function handlePlateChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
+        setPlate(onlyNumbers)
+    }
+
+    function handleFloorChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
+        setFloor(onlyNumbers)
+    }
+
+    function handleUnitChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
+        setUnit(onlyNumbers)
+    }
+
     async function handlePayment() {
+        if (!selectedProvince) {
+            alert("لطفاً استان را انتخاب کنید")
+            return
+        }
+        if (!selectedCity) {
+            alert("لطفاً شهر را انتخاب کنید")
+            return
+        }
+        if (!address.trim()) {
+            alert("لطفاً آدرس را وارد کنید")
+            return
+        }
+        if (!plate.trim()) {
+            alert("لطفاً پلاک را وارد کنید")
+            return
+        }
+        if (!phone.trim()) {
+            alert("لطفاً شماره موبایل را وارد کنید")
+            return
+        }
+        if (!postalCode.trim()) {
+            alert("لطفاً کد پستی را وارد کنید")
+            return
+        }
+        if (cart.length === 0) {
+            alert("سبد خرید شما خالی است")
+            return
+        }
+
         const response = await fetch("/api/order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -31,6 +88,9 @@ export default function Checkout() {
                 total: finalTotal,
                 phone,
                 address,
+                plate,
+                floor,
+                unit,
                 province: selectedProvince,
                 city: selectedCity,
                 postalCode,
@@ -84,12 +144,40 @@ export default function Checkout() {
                     onChange={(e) => setAddress(e.target.value)}
                 />
 
+                <div className="flex gap-2 mb-4">
+                    <input
+                        type="text"
+                        placeholder="پلاک"
+                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
+                        value={plate}
+                        onChange={handlePlateChange}
+                        maxLength={4}
+                    />
+                    <input
+                        type="text"
+                        placeholder="طبقه"
+                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
+                        value={floor}
+                        onChange={handleFloorChange}
+                        maxLength={3}
+                    />
+                    <input
+                        type="text"
+                        placeholder="واحد"
+                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
+                        value={unit}
+                        onChange={handleUnitChange}
+                        maxLength={3}
+                    />
+                </div>
+
                 <input
                     type="tel"
                     placeholder="شماره موبایل (مثال: 09123456789)"
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={handlePhoneChange}
+                    maxLength={11}
                 />
 
                 <input
@@ -97,7 +185,8 @@ export default function Checkout() {
                     placeholder="کد پستی"
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                     value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
+                    onChange={handlePostalCodeChange}
+                    maxLength={10}
                 />
 
                 <textarea
