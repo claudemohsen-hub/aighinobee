@@ -18,3 +18,11 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, message: "سفارش شما با موفقیت ثبت شد", orderId: order.id })
 }
+
+export async function GET() {
+    const orders = await prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+    })
+
+    return Response.json(orders)
+}
