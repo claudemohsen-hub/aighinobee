@@ -23,3 +23,10 @@ model Order {
   plate       String   @default("")
   floor       String?
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  phone    String @unique
+  password String
+  name     String?
+}
