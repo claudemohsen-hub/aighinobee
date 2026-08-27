@@ -4,122 +4,191 @@
 - **نام:** محسن عامنش
 - **پروژه:** آیگینوبی (فروش عسل) — هدف نهایی: سایت واقعی و حرفه‌ای برای فروش عمومی
 - **سیستم‌عامل:** Mac Air M5 + Windows (هر دو استفاده می‌شن)
-- **هدف کلی:** یادگیری فرانت‌اند حرفه‌ای، سپس بک‌اند با زبان‌های روز دنیا، ساخت سایت کاملاً واقعی قبل از دیپلوی
+- **هدف کلی:** یادگیری فرانت‌اند حرفه‌ای، سپس بک‌اند، ساخت سایت کاملاً واقعی و کامل قبل از دیپلوی
 
 ## ⚠️ روش تدریس فعلی (تعادل)
-- **برای مفاهیم جدید/منطقی:** سوال بپرس، بگذار خودش فکر کند.
-- **برای سینتکس، الگوهای تکراری:** مستقیم‌تر کد بده، به‌خصوص وقتی محسن می‌گوید «خودت بگو».
+- **مفاهیم جدید/منطقی:** سوال بپرس، بگذار خودش فکر کند.
+- **سینتکس، الگوهای تکراری، کد پیچیده:** مستقیم‌تر کد بده وقتی محسن می‌گوید «خودت بگو» یا وقت کمه.
 - وقتی کد پیچیده می‌شود یا محسن می‌ترسد اشتباه کند، فایل کامل بساز.
-- گاهی وقتی چیزی کاملاً جدید است (مثل منطق if/return شرطی)، محسن اعتراض می‌کند که چرا کد آماده دادی — در این مواقع صادقانه توضیح بده کدام بخش تکراری بود و کدام جدید.
 
 ## ⚠️⚠️ قانون طلایی: اول هر جلسه بپرس Mac یا Windows
-چون محسن مدام جابه‌جا می‌شود. چک‌لیست کامل انتقال سیستم:
+چون محسن مدام جابه‌جا می‌شود. چک‌لیست انتقال سیستم:
 1. `git pull`
 2. `npm install`
-3. **فایل `.env` را چک کن** — همیشه با گیت منتقل نمی‌شود، دستی بساز:
-   ```
-   DATABASE_URL="postgres://0668edc26f6ba816336bd34afd74286539969369847f3c07d68f41a1d07aad47:sk_qY3WrH2Lvi4M2YFQJgMop@db.prisma.io:5432/postgres?sslmode=require"
-   ```
+3. **فایل `.env` را چک کن** — همیشه با گیت منتقل نمی‌شود، دستی بساز با `DATABASE_URL` واقعی
 4. اگر خطای `app/generated/prisma`: `npx prisma generate`
-5. اگر نسخه‌ی Prisma عجیب (`8.0.0-rc`) نصب شد، مطمئن شو از نسخه‌ی پایدار (`7.9.1`) استفاده می‌شود — پکیج `package.json` باید نسخه‌ی دقیق را نگه دارد
+5. بعد از هر schema change: سرور را کامل ری‌استارت کن
 
 ---
 
-## 🗺 نقشه‌ی راه توسعه‌یافته (بعد از تصمیم محسن در جلسه ۷۳)
+## 🗺 نقشه‌ی راه (وضعیت جدید بعد از جلسه ۷۶+)
 
-محسن تصریح کرد: می‌خواهد سایت **کاملاً کامل و حرفه‌ای** شود (نه فقط نمونه‌ی ساده)، شامل تمام بخش‌های یک فروشگاه واقعی، **قبل از** دیپلوی آنلاین کردن.
-
-### ترتیب توافق‌شده:
 | مرحله | موضوع | وضعیت |
 |-------|--------|--------|
-| ۱ | امنیت پنل ادمین (رمز عبور ساده) | ✅ تموم شد (جلسه ۷۳) |
-| ۲ | مدیریت وضعیت سفارش (فیلد status) | ⏳ **گیر کرده — جلسه ۷۴ ناتمام** |
-| ۳ | سیستم ورود/عضویت کاربر (Login واقعی) | ⏳ |
-| ۴ | پنل کاربری مشتری | ⏳ |
-| ۵ | پیامک (SMS) تایید سفارش | ⏳ |
-| ۶ | مدیریت محصولات از پنل ادمین | ⏳ |
-| ۷ | دیپلوی روی Vercel | ⏳ |
-| ۸ | درگاه پرداخت واقعی محسن | ⏳ |
-
-**تخمین کلی:** ۳۰-۵۰ جلسه تا تکمیل کامل (بر اساس سرعت واقعی مشاهده‌شده در این مسیر، با احتساب مشکلات فنی غیرمنتظره مثل ماجرای Prisma).
+| ۱ | امنیت پنل ادمین (رمز ساده) | ✅ تموم (جلسه ۷۳) |
+| ۲ | مدیریت وضعیت سفارش (status) | ✅ تموم — بعد از کشف اینکه Prisma Client به دلیل "Drift" هیچ‌وقت واقعاً sync نمی‌شد (جلسه ۷۴-۷۶) |
+| ۲.۵ | اعتبارسنجی فرم checkout + فیلد پلاک/طبقه/واحد | ✅ تموم (جلسه ۷۵) |
+| ۳ | **سیستم ورود/عضویت کاربر (Login واقعی)** | ✅ **تموم — پیاده‌سازی کامل شد خارج از این گفتگو (توضیح در پایین)** |
+| ۴ | پنل کاربری مشتری (`/account`) | ⏳ **بعدی — پیشنهاد شده در مستندات محسن** |
+| ۵ | اتصال Order به User | ⏳ (بعد از پنل کاربری) |
+| ۶ | پیامک (SMS) تایید سفارش | ⏳ |
+| ۷ | مدیریت محصولات از پنل ادمین | ⏳ |
+| ۸ | دیپلوی روی Vercel | ⏳ |
+| ۹ | درگاه پرداخت واقعی محسن | ⏳ |
 
 ---
 
-## 🚨🚨 مشکل حل‌نشده — دقیقاً از اینجا جلسه‌ی بعد شروع شود (جلسه ۷۴)
+## 🚨 مهم: بخش بزرگی از کار (سیستم احراز هویت) خارج از این گفتگو انجام شد
 
-### شرح دقیق مشکل
-در جلسه ۷۴ سعی شد فیلد جدید `status` به مدل `Order` در `prisma/schema.prisma` اضافه شود:
+در جلسه‌ای بعد از حل مشکل `status`، محسن یک سند Word کامل آپلود کرد که نشان می‌داد یک سیستم کامل احراز هویت پیاده‌سازی و تست شده — این کار به‌صورت مستقل (احتمالاً با کمک ابزار دیگر مثل ChatGPT یا مستقل) انجام شده، نه در این گفتگو. **باید در ابتدای جلسه‌ی بعد از محسن پرسیده شود که آیا این کار را خودش/با چه ابزاری انجام داد**، تا مشخص شود چقدر این مفاهیم را واقعاً فهمیده در مقابل کپی کرده.
+
+### خلاصه‌ی کامل سیستم احراز هویت که ساخته شده:
+
+**۱. حل مشکل Drift دیتابیس (که ما در جلسات قبل نتوانستیم حلش کنیم):**
+```
+npx prisma db pull
+npx prisma migrate resolve --applied 20260825065721_add_order_model
+npx prisma migrate status   → "Database schema is up to date!"
+```
+سپس چون از دست دادن داده مشکلی نداشت:
+```
+npx prisma migrate reset
+```
+این دقیقاً همان روش درستی بود که ما باید در جلسات قبل امتحان می‌کردیم — دستور `migrate resolve --applied` یک قدم حیاتی بود که در جلسات قبلی امتحان نشده بود.
+
+**۲. مدل User اضافه شد:**
 ```prisma
-model Order {
-  id          Int      @id @default(autoincrement())
-  phone       String
-  address     String
-  province    String
-  city        String
-  postalCode  String
-  description String?
-  items       Json
-  totalPrice  Int
-  createdAt   DateTime @default(now())
-  status      String   @default("در حال بررسی")
+model User {
+  id       Int    @id @default(autoincrement())
+  phone    String @unique
+  password String
+  name     String?
 }
 ```
+Migration: `npx prisma migrate dev --name add_user_model` سپس `add_user_name`
 
-### چه چیزهایی امتحان شد و همه شکست خوردند:
-1. `npx prisma migrate dev --name add_status_field` → گفت "Already in sync, no schema change" (اشتباه، چون واقعاً تغییر کرده بود)
-2. `npx prisma generate` دوباره اجرا شد → موفق (Client دوباره ساخته شد) ولی مشکل حل نشد
-3. `npx prisma migrate dev --name add_order_status` (نام متفاوت) → باز هم "Already in sync"
-4. بررسی شد که فقط یک فایل `schema.prisma` در پروژه وجود دارد (با `find`) — تایید شد، مشکل از فایل تکراری نیست
-5. بررسی پوشه‌ی `prisma/migrations` → فقط یک پوشه‌ی قدیمی `20260825065721_add_order_model` وجود داشت؛ migration جدید هیچ‌وقت پوشه نساخت
-6. `npx prisma db push` → گفت "already in sync" (باز هم اشتباه)
-7. Prisma Studio باز شد (`npx prisma studio`) و به‌طور قطعی تایید شد که ستون `status` در جدول واقعی دیتابیس **وجود ندارد** — همه‌ی ستون‌های دیگر (id, address, city, createdAt, description, items, phone, postalCode, province, totalPrice) هستند ولی status نیست
-8. **آخرین اقدام:** `npx prisma db push --force-reset` اجرا شد — این دستور دیتابیس را کاملاً پاک و از نو ساخت (محسن تایید کرد داده‌های تستی مهم نبودند). خروجی موفقیت‌آمیز بود: "Your database is now in sync with your Prisma schema"
-9. **با این حال، بعد از تست یک سفارش جدید، همچنان `status` وجود نداشت!**
+**۳. نصب bcryptjs برای هش کردن رمز:**
+```
+npm install bcryptjs
+```
 
-### نتیجه‌گیری در پایان جلسه
-حتی بعد از `--force-reset` کامل، فیلد `status` هنوز در دیتابیس ظاهر نمی‌شود. این یک مشکل غیرمعمول و حل‌نشده است. جلسه به‌خاطر کمبود وقت محسن متوقف شد، **بدون حل مشکل**.
+**۴. ساختار نهایی `lib/prisma.ts` (بدون تغییر از قبل):**
+```typescript
+import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
+export default prisma;
+```
+⚠️ نکته مهم: export به صورت `default` است، پس همه‌جا باید `import prisma from "@/lib/prisma"` (بدون آکولاد) استفاده شود.
 
-### فرضیه‌های بررسی‌نشده برای جلسه‌ی بعد (باید امتحان شوند):
-1. **بررسی کن آیا واقعاً فایل `schema.prisma` که در حال ویرایش است دقیقاً همان فایلی است که `prisma.config.ts` به آن اشاره می‌کند** — دوباره چاپ کامل `prisma.config.ts` و مسیر را دقیق تطبیق بده
-2. **بررسی کن آیا بعد از `--force-reset`، `npx prisma generate` دوباره اجرا شده یا نه** — این قدم را در جلسه‌ی قبل فراموش کردیم بعد از force-reset انجام دهیم! این محتمل‌ترین علت است.
-3. سرور Next.js را کامل ری‌استارت کن (`Ctrl+C` سپس `npm run dev`) — شاید کد قدیمی cache شده در `.next` را هنوز استفاده می‌کند
-4. بررسی کن آیا در `app/api/order/route.ts`، هنگام `prisma.order.create()`، فیلد `status` به‌طور صریح در `data: {...}` نوشته نشده — با اینکه `@default` باید خودکار کار کند، شاید بهتر باشد صریح هم اضافه شود: `status: "در حال بررسی"` در object که به create فرستاده می‌شود، برای اطمینان بیشتر
-5. یک بار با SQL مستقیم (از طریق `npx prisma studio` → تب SQL، یا از طریق `ALTER TABLE "Order" ADD COLUMN status TEXT DEFAULT 'در حال بررسی'`) امتحان شود که آیا مستقیماً می‌شود ستون را اضافه کرد
+**۵. API‌های ساخته‌شده:**
+- `app/api/register/route.ts` — دریافت name/phone/password، بررسی تکراری نبودن شماره، هش کردن رمز با `bcrypt.hash(password, 10)`، ساخت User
+- `app/api/login/route.ts` — بررسی phone، مقایسه رمز با `bcrypt.compare()`، ساخت Cookie با نام `userId` (HttpOnly, SameSite=Lax, Path=/)
+- `app/api/me/route.ts` — خواندن Cookie، برگرداندن `{ id, phone, name }` (بدون رمز عبور)
+- `app/api/logout/route.ts` — حذف Cookie با `cookieStore.delete("userId")`
 
-**قدم اول پیشنهادی برای جلسه‌ی بعد: دوباره `npx prisma generate` بزن (بعد از force-reset قبلی)، سرور را کامل ری‌استارت کن، و دوباره تست کن.**
+**۶. صفحات:**
+- `app/register/page.tsx` — فرم سه‌فیلدی (نام، موبایل، رمز)
+- `app/login/page.tsx` — فرم دوفیلدی، بعد از موفقیت `router.push("/")`
+- **نکته‌ی مهم دیباگ:** یک بار صفحه‌ی `page.tsx` اشتباهی داخل `app/api/register/` ساخته شد که با `route.ts` تداخل داشت (خطای "Conflicting route and page") — راه‌حل: انتقال صفحه به مسیر جدای `app/register/page.tsx`
+
+**۷. Navbar داینامیک (`app/Navbar.tsx`):**
+Client Component که موقع لود، `/api/me` را fetch می‌کند:
+- کاربر مهمان → نمایش «ورود | ثبت‌نام»
+- کاربر واردشده → نمایش «نام کاربر | خروج»
+- نکته‌ی دیباگ: اول Navbar بعد از Login آپدیت نمی‌شد چون Cookie جدید را دوباره چک نمی‌کرد — حل شد با `router.push("/")` بعد از login موفق که باعث می‌شود کل صفحه (و Navbar) دوباره mount/fetch شود
+
+**۸. `layout.tsx` آپدیت شد:**
+```tsx
+<CartContext>
+  <Navbar />
+  {children}
+</CartContext>
+```
+CartContext, فونت Vazirmatn, و RTL حفظ شدند (چیزی خراب نشد).
+
+### همه‌ی موارد زیر با curl تست و تایید شدند:
+ثبت‌نام، جلوگیری از شماره تکراری، هش رمز، Login، ساخت Cookie، `/api/me`، نمایش نام، Logout، حذف Cookie، نمایش صحیح Navbar برای مهمان/کاربر، انتقال بعد از Login.
+
+### ساختار نهایی فایل‌ها:
+```
+app/
+├── api/
+│   ├── register/route.ts
+│   ├── login/route.ts
+│   ├── me/route.ts
+│   └── logout/route.ts
+├── register/page.tsx
+├── login/page.tsx
+├── Navbar.tsx
+└── layout.tsx
+
+prisma/
+├── schema.prisma
+└── migrations/
+    ├── 20260825065721_add_order_model
+    ├── 20260827070443_add_user_model
+    └── (migration مربوط به add_user_name)
+
+lib/
+└── prisma.ts
+```
+
+### پیشنهاد بعدی (از سند خود محسن)
+مرحله‌ی منطقی بعدی: **صفحه‌ی حساب کاربری** در مسیر `/account` شامل نام، شماره، سفارش‌ها، وضعیت سفارش‌ها، خروج — و سپس **اتصال Order به User** (اضافه کردن رابطه‌ی foreign key بین دو مدل) تا هر سفارش مشخص باشد مال کدام کاربر است.
 
 ---
 
-## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده (جلسات ۱-۷۳)
+## 📚 جلسه‌ی بعدی: جلسه ۷۷
+۱. بپرس Mac یا Windows، اجرای چک‌لیست همگام‌سازی
+۲. بپرس این سیستم احراز هویت را خودش نوشته یا با کمک ابزار دیگری — برای درک سطح فهم محسن از این مفاهیم (Cookie, bcrypt, session) و تصمیم گرفتن چقدر باید توضیح داد
+۳. تایید کن سیستم لاگین هنوز کار می‌کند (چون ممکن است بین این دو سیستم دوباره sync لازم باشد)
+۴. شروع مرحله‌ی بعدی: صفحه‌ی `/account` + اتصال Order به User
 
-### HTML تا دیتابیس واقعی (جلسات ۱-۷۱)
-تکمیل کامل فرانت‌اند + بک‌اند پایه + اتصال به PostgreSQL واقعی از طریق Prisma با Adapter Pattern. برای جزئیات کامل به نسخه‌ی قبلی این فایل مراجعه شود.
+---
 
-### پنل ادمین (جلسات ۷۲-۷۳)
-- `GET` اضافه شد به `app/api/order/route.ts` برای خواندن لیست سفارش‌ها (`prisma.order.findMany`)
-- صفحه‌ی `app/admin/orders/page.tsx` با `useEffect` + `fetch` برای گرفتن و نمایش سفارش‌ها
-- چیدمان Grid برای کارت‌های سفارش: `grid grid-cols-4 gap-4`
-- **امنیت پایه:** رمز عبور ساده با `useState` + منطق شرطی:
-  ```tsx
-  if (!isLoggedIn) {
-      return (<div>فرم رمز</div>)
+## ✅ خلاصه‌ی مفاهیم یادگرفته‌شده در این گفتگو (جلسات ۱-۷۶)
+
+برای جزئیات کامل جلسات ۱-۷۱ (HTML تا دیتابیس پایه) به نسخه‌های قبلی این فایل مراجعه شود. خلاصه‌ی جلسات اخیر:
+
+### جلسات ۷۲-۷۳: پنل ادمین + امنیت پایه
+- API GET برای خواندن سفارش‌ها (`prisma.order.findMany`)
+- صفحه‌ی `/admin/orders` با گرید ۴ ستونه
+- رمز عبور ساده با منطق `if (!isLoggedIn) return (...)` — امنیت سطح پایه، نه واقعی
+
+### جلسات ۷۴-۷۶: حل مشکل عمیق status + PUT + validation
+- **مشکل بزرگ حل‌شده:** فیلد `status` علیرغم چندین تلاش (migrate dev, db push, حتی force-reset) در Prisma Client ظاهر نمی‌شد — نهایتاً با SQL مستقیم (`ALTER TABLE`) در جلسه ۷۴ حل شد، ولی مشکل مشابه دوباره برای PUT/update برگشت
+- **ریشه‌ی واقعی مشکل (کشف‌شده در سند محسن):** این یک "Drift" واقعی بین migration history و دیتابیس واقعی بود. راه‌حل درست: `npx prisma db pull` + `npx prisma migrate resolve --applied [نام_migration]` + در نهایت `npx prisma migrate reset`
+- API `PUT` برای آپدیت وضعیت سفارش:
+  ```typescript
+  export async function PUT(request: Request) {
+      const data = await request.json()
+      const updatedOrder = await prisma.order.update({
+          where: { id: data.id },
+          data: { status: data.status }
+      })
+      return Response.json({ success: true, order: updatedOrder })
   }
-  return (<div>محتوای اصلی</div>)
   ```
-  ⚠️ این فقط امنیت سطح پایین است، باید بعداً با Login واقعی جایگزین شود.
+- دراپ‌داون تغییر وضعیت در پنل ادمین با `handleStatusChange`
+- اعتبارسنجی کامل فرم checkout: فقط عدد برای موبایل/کدپستی (`replace(/[^0-9]/g, "")`)، چک اجباری بودن فیلدها قبل از پرداخت با سری `if...return`
+- فیلدهای پلاک/طبقه/واحد کنار هم با `flex gap-2`، هرکدام `useState` جدا و ذخیره‌ی جدا در دیتابیس
+
+### جلسات ۷۷+: سیستم احراز هویت کامل (خارج از این گفتگو، شرح کامل در بالا)
 
 ---
 
-## 🔧 وضعیت نهایی پروژه (honey-next) تا جلسه ۷۳-۷۴
+## 🔧 وضعیت نهایی پروژه (honey-next)
 
-**صفحات:** `/`, `/products`, `/products/[id]`, `/cart`, `/checkout`, `/contactus`, `/admin/orders` (با رمز عبور محافظت‌شده)
+**صفحات:** `/`, `/products`, `/products/[id]`, `/cart`, `/checkout` (با validation کامل)، `/contactus`, `/admin/orders` (با امنیت رمز و تغییر وضعیت)، `/register`, `/login`
 
 **API Routes:**
-- `app/api/hello/route.ts`
-- `app/api/products/route.ts`
-- `app/api/order/route.ts` — دارای هر دو `POST` (ثبت سفارش) و `GET` (خواندن سفارش‌ها)
+- `app/api/hello/route.ts`, `app/api/products/route.ts`
+- `app/api/order/route.ts` — POST/GET/PUT کامل
+- `app/api/register/route.ts`, `app/api/login/route.ts`, `app/api/me/route.ts`, `app/api/logout/route.ts`
 
-**مدل دیتابیس (`prisma/schema.prisma`):**
+**مدل‌های دیتابیس (`prisma/schema.prisma`):**
 ```prisma
 model Order {
   id          Int      @id @default(autoincrement())
@@ -133,64 +202,75 @@ model Order {
   totalPrice  Int
   createdAt   DateTime @default(now())
   status      String   @default("در حال بررسی")
+  plate       String
+  floor       String?
+  unit        String?
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  phone    String  @unique
+  password String
+  name     String?
 }
 ```
-⚠️ فیلد `status` در فایل schema هست ولی **در دیتابیس واقعی اعمال نشده** — این مشکل حل‌نشده‌ی اصلی است.
+⚠️ Order و User هنوز به هم متصل نیستند (بدون رابطه/foreign key) — این کار بعدی است.
 
-**دیتابیس:** بعد از `--force-reset` در جلسه ۷۴، تمام سفارش‌های تستی قبلی پاک شدند (عمدی و با تایید محسن).
+**دیتابیس:** بعد از `migrate reset` در جریان حل مشکل Drift، دوباره از نو ساخته شد.
 
 ---
 
 ## 🌐 گیت‌هاب و همگام‌سازی
 - **Repository:** `github.com/claudemohsen-hub/aighinobee`
 - push.sh (Mac) / push.bat (Windows) در ریشه‌ی `Code Learning`
-- **آخرین وضعیت شناخته‌شده:** جلسه ۷۳ از Mac پوش شد. جلسه ۷۴ (مشکل status) هنوز push نشده چون کار ناتمام است.
+- آخرین وضعیت شناخته‌شده در این گفتگو: کار روی Mac در حال انجام مشکل status بود؛ سیستم احراز هویت بعد از آن (احتمالاً روی Windows، طبق مستندات که "محیط توسعه: Windows" نوشته) ساخته شد
 
 ---
 
 ## ⚠️ الگوهای خطای رایج محسن
-- فراموشی `className=` قبل از کلاس‌ها
-- بستن ناقص تگ‌ها یا `<div>` بی‌جفت (باعث "Expected '}'  یا '</', got '<eof>'")
-- تکرار خط‌ها یا جا انداختن هنگام کپی/ادیت دستی
-- سردرگمی بین اسم‌های مشابه فایل‌ها یا مسیرها
-- فراموشی ری‌استارت سرور بعد از تغییر فایل‌های سراسری
-- گاهی فایل اشتباه/بیرون از پروژه را باز می‌کند (مثل `Honey/prisma.ts` به‌جای `Honey/honey-next/lib/prisma.ts`)
-- سوالات فنی گاهی از حوزه‌ی کد خارج می‌شوند (مثل سوال درباره‌ی جهت متن چت) — باید با صبر و دقت روشن شود منظور دقیقاً چیست
+- فراموشی `className=`، بستن ناقص تگ‌ها/`<div>` بی‌جفت
+- تکرار یا جا انداختن خط هنگام کپی/ادیت دستی
+- سردرگمی بین اسم‌های مشابه یا مسیرهای مشابه فایل‌ها
+- فراموشی ری‌استارت سرور بعد از تغییرات سراسری
+- گاهی فایل اشتباه/بیرون از پروژه را باز می‌کند
 - ترجیح می‌دهد وقتی کد پیچیده می‌شود، فایل کامل را بگیرد و کپی کند
+- گاهی بخشی از کار را مستقل یا با ابزار دیگر انجام می‌دهد و بعد نتیجه را می‌آورد — باید همیشه پرسیده شود این کار در همین گفتگو انجام شده یا جای دیگر
 
 ---
 
 ## 📝 نکات فنی کلیدی (Cheat sheet سریع)
 - **اجرای پروژه:** `cd honey-next && npm run dev` → پورت 3000
-- **بعد از pull روی سیستم جدید:** `npm install` + بازسازی `.env` + `npx prisma generate`
-- **دیدن دیتابیس بصری:** `npx prisma studio` (باز می‌شود در مرورگر، پورت جداگانه مثل 51212)
-- **اعمال تغییرات schema به دیتابیس (روش معمول):** `npx prisma migrate dev --name توضیح_کوتاه`
-- **اگر migrate کار نکرد (مثل مشکل جلسه ۷۴):** `npx prisma db push` یا در موارد حاد `npx prisma db push --force-reset` (⚠️ همه‌ی داده‌ها پاک می‌شود، فقط با تایید کاربر)
-- **بعد از هر تغییر دیتابیسی:** حتماً `npx prisma generate` را دوباره بزن، بعد سرور Next.js را کامل ری‌استارت کن
-- **API Route با هر دو GET و POST در یک فایل:**
+- **بعد از pull روی سیستم جدید:** `npm install` + `.env` دستی + `npx prisma generate`
+- **دیدن دیتابیس بصری:** `npx prisma studio`
+- **حل مشکل Drift دیتابیس (روش درست کشف‌شده):**
+  ```
+  npx prisma db pull
+  npx prisma migrate resolve --applied [نام_migration]
+  npx prisma migrate status
+  # اگر لازم بود و از دست دادن داده مشکلی نداشت:
+  npx prisma migrate reset
+  ```
+- **بعد از هر schema change:** `npx prisma generate` + ری‌استارت کامل سرور (`rm -rf .next` در موارد حاد)
+- **API Route با چند متد در یک فایل:** `POST`, `GET`, `PUT` همه با `export async function` جدا در یک `route.ts`
+- **الگوی احراز هویت با Cookie:**
   ```typescript
-  export async function POST(request: Request) { ... }
-  export async function GET() { ... }
+  // ساخت
+  cookieStore.set("userId", String(user.id), { httpOnly: true, sameSite: "lax", path: "/" })
+  // خواندن
+  const userId = cookieStore.get("userId")?.value
+  // حذف
+  cookieStore.delete("userId")
   ```
-- **گرفتن داده در صفحه با useEffect:**
-  ```tsx
-  useEffect(() => {
-      fetch("/api/order").then(res => res.json()).then(data => setOrders(data))
-  }, [])
-  ```
-- **نمایش شرطی کل صفحه (برای رمز عبور یا لاگین):**
-  ```tsx
-  if (!isLoggedIn) { return (<div>فرم</div>) }
-  return (<div>محتوای اصلی</div>)
-  ```
+- **هش کردن رمز:** `bcrypt.hash(password, 10)` برای ساخت، `bcrypt.compare(password, hashedPassword)` برای مقایسه
+- **نمایش شرطی کل صفحه:** `if (!isLoggedIn) { return (<div>فرم</div>) }` سپس `return (<div>محتوای اصلی</div>)`
 
 ---
 
 ## 🔐 یادداشت مهم برای بک‌اند آینده
-محسن یک **کلید/کد API درگاه پرداخت واقعی** دارد که باید در آینده (بعد از تکمیل مراحل بالا) به دکمه‌ی پرداخت در `/checkout` وصل شود، از طریق Next.js API Route.
+محسن یک **کلید/کد API درگاه پرداخت واقعی** دارد که باید در آینده (بعد از پنل کاربری و اتصال Order به User) به دکمه‌ی پرداخت در `/checkout` وصل شود.
 
 ---
 
-**آخرین آپدیت:** پایان جلسه‌ی ۷۴ (ناتمام)
-**وضعیت:** پنل ادمین با امنیت پایه کار می‌کند؛ تلاش برای اضافه کردن فیلد `status` به مدل Order **ناموفق بوده** با وجود چندین روش امتحان‌شده از جمله force-reset کامل دیتابیس
-**بعدی:** جلسه ۷۵ — حل مشکل فیلد status (شروع با `npx prisma generate` دوباره بعد از force-reset + ری‌استارت کامل سرور)، سپس ادامه‌ی نقشه‌ی راه توسعه‌یافته
+**آخرین آپدیت:** بعد از دریافت سند Word محسن درباره‌ی سیستم احراز هویت کامل
+**وضعیت:** فرانت‌اند + بک‌اند + دیتابیس + پنل ادمین + **سیستم کامل احراز هویت** (ثبت‌نام/ورود/خروج/Cookie) — همگی عملیاتی و تست‌شده
+**بعدی:** جلسه ۷۷ — تایید نحوه‌ی انجام کار احراز هویت، سپس شروع صفحه‌ی `/account` و اتصال Order به User
