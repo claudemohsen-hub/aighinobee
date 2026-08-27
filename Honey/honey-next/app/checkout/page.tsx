@@ -17,11 +17,16 @@ export default function Checkout() {
     const [description, setDescription] = useState("")
 
     const total = cart.reduce(
-        (sum: number, item: { price: number; quantity: number }) => sum + (item.price * item.quantity),
+        (sum: number, item: { price: number; quantity: number }) =>
+            sum + item.price * item.quantity,
         0
     )
 
-    const totalQuantity = cart.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0)
+    const totalQuantity = cart.reduce(
+        (sum: number, item: { quantity: number }) => sum + item.quantity,
+        0
+    )
+
     const shippingPrice = totalQuantity * 55000
     const finalTotal = shippingPrice + total
 
@@ -55,51 +60,80 @@ export default function Checkout() {
             alert("لطفاً استان را انتخاب کنید")
             return
         }
+
         if (!selectedCity) {
             alert("لطفاً شهر را انتخاب کنید")
             return
         }
+
         if (!address.trim()) {
             alert("لطفاً آدرس را وارد کنید")
             return
         }
+
         if (!plate.trim()) {
             alert("لطفاً پلاک را وارد کنید")
             return
         }
+
         if (!phone.trim()) {
             alert("لطفاً شماره موبایل را وارد کنید")
             return
         }
+
         if (!postalCode.trim()) {
             alert("لطفاً کد پستی را وارد کنید")
             return
         }
+
         if (cart.length === 0) {
             alert("سبد خرید شما خالی است")
             return
         }
 
-        const response = await fetch("/api/order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                cart,
-                total: finalTotal,
-                phone,
-                address,
-                plate,
-                floor,
-                unit,
-                province: selectedProvince,
-                city: selectedCity,
-                postalCode,
-                description,
-            }),
-        })
+        try {
+            const response = await fetch("/api/order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    cart,
+                    total: finalTotal,
+                    phone,
+                    address,
+                    plate,
+                    floor,
+                    unit,
+                    province: selectedProvince,
+                    city: selectedCity,
+                    postalCode,
+                    description,
+                }),
+            })
 
-        const result = await response.json()
-        alert(result.message)
+            const text = await response.text()
+
+            console.log("STATUS:", response.status)
+            console.log("RESPONSE:", text)
+
+            if (!response.ok) {
+                alert(`خطا در ثبت سفارش: ${response.status}`)
+                return
+            }
+
+            if (!text) {
+                alert("سرور پاسخ خالی برگرداند")
+                return
+            }
+
+            const result = JSON.parse(text)
+
+            alert(result.message)
+        } catch (error) {
+            console.error("Payment error:", error)
+            alert("خطایی هنگام ثبت سفارش رخ داد")
+        }
     }
 
     return (
@@ -107,6 +141,7 @@ export default function Checkout() {
             <h1 className="text-2xl font-bold mb-4">
                 پرداخت
             </h1>
+
             <div className="max-w-md">
                 <select
                     value={selectedProvince}
@@ -114,6 +149,7 @@ export default function Checkout() {
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                 >
                     <option value="">انتخاب استان</option>
+
                     {Object.keys(provincesAndCities).map((province) => (
                         <option key={province} value={province}>
                             {province}
@@ -128,6 +164,7 @@ export default function Checkout() {
                     onChange={(e) => setSelectedCity(e.target.value)}
                 >
                     <option value="">انتخاب شهر</option>
+
                     {selectedProvince &&
                         provincesAndCities[selectedProvince].map((city) => (
                             <option key={city} value={city}>
@@ -153,6 +190,7 @@ export default function Checkout() {
                         onChange={handlePlateChange}
                         maxLength={4}
                     />
+
                     <input
                         type="text"
                         placeholder="طبقه"
@@ -161,6 +199,7 @@ export default function Checkout() {
                         onChange={handleFloorChange}
                         maxLength={3}
                     />
+
                     <input
                         type="text"
                         placeholder="واحد"
@@ -200,16 +239,24 @@ export default function Checkout() {
             {cart.length === 0 && (
                 <p>سبد خرید خالی است</p>
             )}
+
             {cart.map(
                 (
-                    item: { name: string; price: number; quantity: number },
+                    item: {
+                        name: string
+                        price: number
+                        quantity: number
+                    },
                     index: number
                 ) => (
                     <div
                         key={index}
                         className="flex justify-between items-center border-b py-3"
                     >
-                        <span>{item.name} ({item.quantity})</span>
+                        <span>
+                            {item.name} ({item.quantity})
+                        </span>
+
                         <span>
                             {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
                         </span>
@@ -222,9 +269,11 @@ export default function Checkout() {
                     <div className="mt-5 font-bold">
                         جمع کل: {total.toLocaleString("fa-IR")} تومان
                     </div>
+
                     <div className="mt-6 font-normal">
                         هزینه پستی: {shippingPrice.toLocaleString("fa-IR")} تومان
                     </div>
+
                     <div className="mt-6 text-emerald-600 font-normal">
                         هزینه پرداختی: {finalTotal.toLocaleString("fa-IR")} تومان
                     </div>
