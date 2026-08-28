@@ -6,6 +6,7 @@ export default function OrdersPage() {
     const [messages, setMessages] = useState<any[]>([])
     const [password, setPassword] = useState("")
     const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [checkingSession, setCheckingSession] = useState(true)
     const [activeTab, setActiveTab] = useState<"pending" | "shipped" | "delivered" | "tickets">("pending")
     const [trackingInputs, setTrackingInputs] = useState<{ [key: number]: string }>({})
     const [showSettings, setShowSettings] = useState(false)
@@ -14,6 +15,7 @@ export default function OrdersPage() {
     const [confirmPassword, setConfirmPassword] = useState("")
 
     const ADMIN_PASSWORD_KEY = "adminPassword"
+    const ADMIN_SESSION_KEY = "adminLoggedIn"
     const DEFAULT_PASSWORD = "1234"
 
     function getStoredPassword() {
@@ -21,12 +23,28 @@ export default function OrdersPage() {
         return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD
     }
 
+    // موقع بارگذاری صفحه، چک می‌کنیم آیا قبلاً لاگین کرده بودیم یا نه
+    useEffect(() => {
+        const session = localStorage.getItem(ADMIN_SESSION_KEY)
+        if (session === "true") {
+            setIsLoggedIn(true)
+        }
+        setCheckingSession(false)
+    }, [])
+
     useEffect(() => {
         if (isLoggedIn) {
             fetchOrders()
             fetchMessages()
         }
     }, [isLoggedIn])
+
+    // هر بار که وارد تب تیکت‌ها می‌شیم، دوباره از سرور می‌گیریم تا تازه باشه
+    useEffect(() => {
+        if (isLoggedIn && activeTab === "tickets") {
+            fetchMessages()
+        }
+    }, [activeTab])
 
     function fetchOrders() {
         fetch("/api/order")
@@ -43,9 +61,15 @@ export default function OrdersPage() {
     function handleLogin() {
         if (password === getStoredPassword()) {
             setIsLoggedIn(true)
+            localStorage.setItem(ADMIN_SESSION_KEY, "true")
         } else {
             alert("رمز عبور اشتباه است")
         }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem(ADMIN_SESSION_KEY)
+        setIsLoggedIn(false)
     }
 
     function handleChangePassword() {
@@ -94,6 +118,10 @@ export default function OrdersPage() {
         fetchOrders()
     }
 
+    if (checkingSession) {
+        return null
+    }
+
     if (!isLoggedIn) {
         return (
             <div className="p-6 max-w-sm mx-auto">
@@ -127,12 +155,20 @@ export default function OrdersPage() {
         <div className="p-6 max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-amber-200">پنل مدیریت سفارش‌ها</h1>
-                <button
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="text-amber-200 text-sm underline"
-                >
-                    تنظیمات رمز عبور
-                </button>
+                <div className="flex gap-4 items-center">
+                    <button
+                        onClick={() => setShowSettings(!showSettings)}
+                        className="text-amber-200 text-sm underline"
+                    >
+                        تنظیمات رمز عبور
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="text-amber-200 text-sm underline"
+                    >
+                        خروج
+                    </button>
+                </div>
             </div>
 
             {showSettings && (
