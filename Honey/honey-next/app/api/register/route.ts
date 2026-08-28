@@ -1,5 +1,6 @@
 import prisma from "../../../lib/prisma"
 import bcrypt from "bcryptjs"
+import { sendRegisterSuccess } from "../../../lib/sms"
 
 export async function POST(request: Request) {
     try {
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
                 name: data.name,
             },
         })
+
+        sendRegisterSuccess(data.phone, data.name)
 
         return Response.json({ success: true, message: "ثبت‌نام با موفقیت انجام شد" })
     } catch (error) {
