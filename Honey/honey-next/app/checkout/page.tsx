@@ -33,6 +33,27 @@ export default function Checkout() {
             return
         }
 
+        if (!selectedProvince) {
+            alert("لطفاً استان را انتخاب کنید")
+            return
+        }
+        if (!selectedCity) {
+            alert("لطفاً شهر را انتخاب کنید")
+            return
+        }
+        if (!address.trim()) {
+            alert("لطفاً آدرس را وارد کنید")
+            return
+        }
+        if (!plate.trim()) {
+            alert("لطفاً پلاک را وارد کنید")
+            return
+        }
+        if (!phone.trim() || phone.length !== 11) {
+            alert("لطفاً شماره موبایل معتبر (۱۱ رقم) وارد کنید")
+            return
+        }
+
         const response = await fetch("/api/order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

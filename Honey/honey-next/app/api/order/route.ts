@@ -1,9 +1,33 @@
 import prisma from "../../../lib/prisma"
 import { cookies } from "next/headers"
+import { sendOrderPlacedCustomer, sendNewOrderAdmin, sendOrderShipped } from "../../../lib/sms"
 
 export async function POST(request: Request) {
     try {
         const data = await request.json()
+
+        // اعتبارسنجی سمت سرور — حتی اگه کاربر فرم رو دور بزنه، اینجا جلوش گرفته می‌شه
+        if (!Array.isArray(data.cart) || data.cart.length === 0) {
+            return Response.json({ success: false, message: "سبد خرید خالی است" }, { status: 400 })
+        }
+        if (!data.province || !String(data.province).trim()) {
+            return Response.json({ success: false, message: "استان الزامی است" }, { status: 400 })
+        }
+        if (!data.city || !String(data.city).trim()) {
+            return Response.json({ success: false, message: "شهر الزامی است" }, { status: 400 })
+        }
+        if (!data.address || !String(data.address).trim()) {
+            return Response.json({ success: false, message: "آدرس الزامی است" }, { status: 400 })
+        }
+        if (!data.plate || !String(data.plate).trim()) {
+            return Response.json({ success: false, message: "پلاک الزامی است" }, { status: 400 })
+        }
+        if (!data.phone || !/^\d{11}$/.test(String(data.phone))) {
+            return Response.json({ success: false, message: "شماره موبایل معتبر (۱۱ رقم) الزامی است" }, { status: 400 })
+        }
+        if (typeof data.total !== "number" || data.total <= 0) {
+            return Response.json({ success: false, message: "مبلغ سفارش نامعتبر است" }, { status: 400 })
+        }
 
         const cookieStore = await cookies()
         const userId = cookieStore.get("userId")?.value
@@ -24,6 +48,11 @@ export async function POST(request: Request) {
                 unit: data.unit || null,
             },
         })
+
+        sendOrderPlacedCustomer(data.phone, String(order.id))
+        if (process.env.ADMIN_PHONE) {
+            sendNewOrderAdmin(process.env.ADMIN_PHONE, String(order.id))
+        }
 
         return Response.json({
             success: true,
@@ -69,6 +98,15 @@ export async function PUT(request: Request) {
                 ...(data.trackingCode !== undefined && { trackingCode: data.trackingCode }),
             },
         })
+
+        if (data.status === "ارسال شد" && data.trackingCode) {
+            let customerName = "مشتری گرامی"
+            if (updatedOrder.userId) {
+                const user = await prisma.user.findUnique({ where: { id: updatedOrder.userId } })
+                if (user?.name) customerName = user.name
+            }
+            sendOrderShipped(updatedOrder.phone, customerName, data.trackingCode)
+        }
 
         return Response.json({ success: true, order: updatedOrder })
     } catch (error) {
