@@ -25,9 +25,9 @@ export default function LoginPage() {
         <div className="p-6 max-w-sm mx-auto">
             <h1 className="text-2xl font-bold mb-4 text-amber-200">ورود</h1>
             <input type="tel" placeholder="شماره موبایل" value={phone} onChange={(e) => setPhone(e.target.value)}
-                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black" />
+                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500" />
             <input type="password" placeholder="رمز عبور" value={password} onChange={(e) => setPassword(e.target.value)}
-                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black" />
+                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500" />
             <button onClick={handleLogin} className="bg-amber-800 text-white px-6 py-3 rounded-lg w-full hover:bg-amber-900 transition">
                 ورود
             </button>
