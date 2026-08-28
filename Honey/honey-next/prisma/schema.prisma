@@ -28,9 +28,11 @@ model Order {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  phone    String  @unique
-  password String
-  name     String?
-  orders   Order[]
+  id              Int       @id @default(autoincrement())
+  phone           String    @unique
+  password        String
+  name            String?
+  resetCode       String?
+  resetCodeExpiry DateTime?
+  orders          Order[]
 }
