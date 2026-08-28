@@ -3,9 +3,10 @@ import { useState, useEffect } from "react"
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<any[]>([])
+    const [messages, setMessages] = useState<any[]>([])
     const [password, setPassword] = useState("")
     const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const [activeTab, setActiveTab] = useState<"pending" | "shipped" | "delivered">("pending")
+    const [activeTab, setActiveTab] = useState<"pending" | "shipped" | "delivered" | "tickets">("pending")
     const [trackingInputs, setTrackingInputs] = useState<{ [key: number]: string }>({})
     const [showSettings, setShowSettings] = useState(false)
     const [currentPassword, setCurrentPassword] = useState("")
@@ -21,13 +22,22 @@ export default function OrdersPage() {
     }
 
     useEffect(() => {
-        if (isLoggedIn) fetchOrders()
+        if (isLoggedIn) {
+            fetchOrders()
+            fetchMessages()
+        }
     }, [isLoggedIn])
 
     function fetchOrders() {
         fetch("/api/order")
             .then((res) => res.json())
             .then((data) => setOrders(data))
+    }
+
+    function fetchMessages() {
+        fetch("/api/contact")
+            .then((res) => res.json())
+            .then((data) => setMessages(data))
     }
 
     function handleLogin() {
@@ -110,7 +120,8 @@ export default function OrdersPage() {
     const shippedOrders = orders.filter((o) => o.status === "ارسال شد")
     const deliveredOrders = orders.filter((o) => o.status === "تحویل داده شد")
 
-    const listToShow = activeTab === "pending" ? pendingOrders : activeTab === "shipped" ? shippedOrders : deliveredOrders
+    const listToShow =
+        activeTab === "pending" ? pendingOrders : activeTab === "shipped" ? shippedOrders : deliveredOrders
 
     return (
         <div className="p-6 max-w-6xl mx-auto">
@@ -157,7 +168,7 @@ export default function OrdersPage() {
                 </div>
             )}
 
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-6 flex-wrap">
                 <button
                     onClick={() => setActiveTab("pending")}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold ${activeTab === "pending" ? "bg-amber-800 text-white" : "bg-white/10 text-amber-100"}`}
@@ -176,83 +187,118 @@ export default function OrdersPage() {
                 >
                     تحویل داده شده ({deliveredOrders.length})
                 </button>
+                <button
+                    onClick={() => setActiveTab("tickets")}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold ${activeTab === "tickets" ? "bg-amber-800 text-white" : "bg-white/10 text-amber-100"}`}
+                >
+                    تیکت‌ها ({messages.length})
+                </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listToShow.map((order) => (
-                    <div key={order.id} className="bg-white rounded-xl shadow-md p-4 text-black">
-                        <div className="flex justify-between items-start mb-2">
-                            <p className="font-bold">سفارش #{order.id}</p>
-                            <span className="text-xs text-gray-500">
-                                {new Date(order.createdAt).toLocaleDateString("fa-IR")}
-                            </span>
-                        </div>
-
-                        <p className="text-sm">موبایل: {order.phone}
-                            <button
-                                onClick={() => navigator.clipboard.writeText(order.phone)}
-                                className="text-amber-700 text-xs mr-2 underline"
-                            >
-                                کپی
-                            </button>
-                        </p>
-
-                        <p className="text-sm">آدرس: {order.province}، {order.city}، {order.address}، پلاک {order.plate}
-                            {order.floor ? `، طبقه ${order.floor}` : ""}{order.unit ? `، واحد ${order.unit}` : ""}
-                        </p>
-                        <p className="text-sm">کد پستی: {order.postalCode}</p>
-                        {order.description && <p className="text-sm text-gray-500">توضیحات: {order.description}</p>}
-
-                        <div className="border-t border-gray-200 mt-2 pt-2">
-                            {order.items.map((item: any, index: number) => (
-                                <p key={index} className="text-xs text-gray-700">
-                                    {item.name} × {item.quantity}
-                                </p>
-                            ))}
-                        </div>
-
-                        <p className="mt-2 font-semibold">جمع کل: {order.totalPrice.toLocaleString("fa-IR")} تومان</p>
-
-                        {activeTab === "pending" && (
-                            <div className="mt-3">
-                                <input
-                                    type="text"
-                                    placeholder="کد پیگیری تیپاکس"
-                                    value={trackingInputs[order.id] || ""}
-                                    onChange={(e) => setTrackingInputs({ ...trackingInputs, [order.id]: e.target.value })}
-                                    className="border border-gray-300 rounded-lg p-2 w-full mb-2 text-sm text-black bg-white"
-                                />
-                                <button
-                                    onClick={() => markAsShipped(order.id)}
-                                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg w-full hover:bg-blue-700 transition"
-                                >
-                                    بسته‌بندی و ارسال شد
-                                </button>
+            {activeTab === "tickets" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {messages.map((msg) => (
+                        <div key={msg.id} className="bg-white rounded-xl shadow-md p-4 text-black">
+                            <div className="flex justify-between items-start mb-2">
+                                <p className="font-bold">{msg.name}</p>
+                                <span className="text-xs text-gray-500">
+                                    {new Date(msg.createdAt).toLocaleDateString("fa-IR")}
+                                </span>
                             </div>
-                        )}
-
-                        {activeTab === "shipped" && (
-                            <div className="mt-3">
-                                <p className="text-sm mb-2">کد پیگیری: <span className="font-semibold">{order.trackingCode}</span></p>
+                            <p className="text-sm">
+                                موبایل: {msg.phone}
                                 <button
-                                    onClick={() => markAsDelivered(order.id)}
-                                    className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg w-full hover:bg-green-700 transition"
+                                    onClick={() => navigator.clipboard.writeText(msg.phone)}
+                                    className="text-amber-700 text-xs mr-2 underline"
                                 >
-                                    تحویل داده شد
+                                    کپی
                                 </button>
+                            </p>
+                            <p className="text-sm mt-2 text-gray-700">{msg.message}</p>
+                        </div>
+                    ))}
+
+                    {messages.length === 0 && (
+                        <p className="text-gray-300 col-span-full text-center py-10">تیکتی وجود ندارد</p>
+                    )}
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {listToShow.map((order) => (
+                        <div key={order.id} className="bg-white rounded-xl shadow-md p-4 text-black">
+                            <div className="flex justify-between items-start mb-2">
+                                <p className="font-bold">سفارش #{order.id}</p>
+                                <span className="text-xs text-gray-500">
+                                    {new Date(order.createdAt).toLocaleDateString("fa-IR")}
+                                </span>
                             </div>
-                        )}
 
-                        {activeTab === "delivered" && (
-                            <p className="mt-3 text-sm text-green-700 font-semibold">✓ تحویل داده شده</p>
-                        )}
-                    </div>
-                ))}
+                            <p className="text-sm">موبایل: {order.phone}
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(order.phone)}
+                                    className="text-amber-700 text-xs mr-2 underline"
+                                >
+                                    کپی
+                                </button>
+                            </p>
 
-                {listToShow.length === 0 && (
-                    <p className="text-gray-300 col-span-full text-center py-10">سفارشی در این بخش نیست</p>
-                )}
-            </div>
+                            <p className="text-sm">آدرس: {order.province}، {order.city}، {order.address}، پلاک {order.plate}
+                                {order.floor ? `، طبقه ${order.floor}` : ""}{order.unit ? `، واحد ${order.unit}` : ""}
+                            </p>
+                            <p className="text-sm">کد پستی: {order.postalCode}</p>
+                            {order.description && <p className="text-sm text-gray-500">توضیحات: {order.description}</p>}
+
+                            <div className="border-t border-gray-200 mt-2 pt-2">
+                                {order.items.map((item: any, index: number) => (
+                                    <p key={index} className="text-xs text-gray-700">
+                                        {item.name} × {item.quantity}
+                                    </p>
+                                ))}
+                            </div>
+
+                            <p className="mt-2 font-semibold">جمع کل: {order.totalPrice.toLocaleString("fa-IR")} تومان</p>
+
+                            {activeTab === "pending" && (
+                                <div className="mt-3">
+                                    <input
+                                        type="text"
+                                        placeholder="کد پیگیری تیپاکس"
+                                        value={trackingInputs[order.id] || ""}
+                                        onChange={(e) => setTrackingInputs({ ...trackingInputs, [order.id]: e.target.value })}
+                                        className="border border-gray-300 rounded-lg p-2 w-full mb-2 text-sm text-black bg-white"
+                                    />
+                                    <button
+                                        onClick={() => markAsShipped(order.id)}
+                                        className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg w-full hover:bg-blue-700 transition"
+                                    >
+                                        بسته‌بندی و ارسال شد
+                                    </button>
+                                </div>
+                            )}
+
+                            {activeTab === "shipped" && (
+                                <div className="mt-3">
+                                    <p className="text-sm mb-2">کد پیگیری: <span className="font-semibold">{order.trackingCode}</span></p>
+                                    <button
+                                        onClick={() => markAsDelivered(order.id)}
+                                        className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg w-full hover:bg-green-700 transition"
+                                    >
+                                        تحویل داده شد
+                                    </button>
+                                </div>
+                            )}
+
+                            {activeTab === "delivered" && (
+                                <p className="mt-3 text-sm text-green-700 font-semibold">✓ تحویل داده شده</p>
+                            )}
+                        </div>
+                    ))}
+
+                    {listToShow.length === 0 && (
+                        <p className="text-gray-300 col-span-full text-center py-10">سفارشی در این بخش نیست</p>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
