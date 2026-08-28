@@ -9,7 +9,7 @@ async function sendSms(text: string, to: string, bodyId: number): Promise<SmsRes
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: process.env.MELIPAYAMAK_USERNAME,
-                password: process.env.MELIPAYAMAK_PASSWORD, // اینجا apikey میره
+                password: process.env.MELIPAYAMAK_PASSWORD,
                 text,
                 to,
                 bodyId,
@@ -25,7 +25,6 @@ async function sendSms(text: string, to: string, bodyId: number): Promise<SmsRes
     }
 }
 
-// کدهای الگوی تاییدشده توی پنل ملی‌پیامک
 const BODY_IDS = {
     loginCode: 525733,
     forgotPasswordCode: 525734,
