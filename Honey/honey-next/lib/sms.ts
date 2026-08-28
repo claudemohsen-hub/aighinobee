@@ -1,92 +1,65 @@
-// ============================================================
-// کتابخانه‌ی ارسال پیامک — ملی‌پیامک (سیستم الگو/پترن)
-// ============================================================
-//
-// این فایل یه تابع عمومی داره که با استفاده از "الگو" (Pattern)
-// پیامک می‌فرسته. هر الگو یه کد اختصاصی داره که از پنل ملی‌پیامک
-// می‌گیری و توی .env می‌ذاری.
-//
-// نکته‌ی امنیتی: هیچ‌وقت Username/Password یا API Key رو مستقیم
-// اینجا ننویس — همیشه از process.env بخون.
+type SmsResult = { success: boolean; recId?: string; error?: string }
 
-const MELIPAYAMAK_USERNAME = process.env.MELIPAYAMAK_USERNAME
-const MELIPAYAMAK_PASSWORD = process.env.MELIPAYAMAK_PASSWORD
+const BASE_URL = "https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber"
 
-// آدرس API ارسال پیامک با الگو (پترن) — این آدرس رسمی سرویس REST ملی‌پیامکه
-const MELIPAYAMAK_PATTERN_URL = "https://console.melipayamak.com/api/send/shared/" + MELIPAYAMAK_USERNAME
-
-// کدهای الگو (Pattern Code) — این‌ها رو از پنل ملی‌پیامک می‌گیری
-// و اینجا با اسم مناسب جایگزین می‌کنی (فعلاً placeholder هستن)
-export const SMS_PATTERNS = {
-    REGISTER_SUCCESS: "PATTERN_CODE_REGISTER_SUCCESS", // کاربر عزیز ثبت‌نام شما با موفقیت انجام گردید. آیگینوبی
-    LOGIN_OTP: "PATTERN_CODE_LOGIN_OTP", // کد ورود شما {0} می‌باشد. آیگینوبی
-    FORGOT_PASSWORD_OTP: "PATTERN_CODE_FORGOT_PASSWORD", // کد فراموشی رمز عبور شما {0} می‌باشد. آیگینوبی
-    ORDER_REGISTERED: "PATTERN_CODE_ORDER_REGISTERED", // {نام مشتری} سفارش شما ثبت شد. آیگینوبی
-    ORDER_SHIPPED: "PATTERN_CODE_ORDER_SHIPPED", // {نام مشتری} سفارش شما با کد رهگیری {1} تحویل تیپاکس گردید.
-    NEW_ORDER_ADMIN: "PATTERN_CODE_NEW_ORDER_ADMIN", // سفارش جدید ثبت شد (برای خود محسن)
-}
-
-/**
- * ارسال پیامک با الگو (Pattern)
- * @param to شماره موبایل گیرنده (مثل 09123456789)
- * @param patternCode کد الگو (از SMS_PATTERNS)
- * @param args آرایه‌ی مقادیری که باید جای {0}, {1} و... توی الگو قرار بگیرن
- */
-export async function sendPatternSms(to: string, patternCode: string, args: string[] = []) {
-    if (!MELIPAYAMAK_USERNAME || !MELIPAYAMAK_PASSWORD) {
-        console.error("SMS ERROR: MELIPAYAMAK_USERNAME یا MELIPAYAMAK_PASSWORD در .env تنظیم نشده")
-        return { success: false, message: "تنظیمات پیامک کامل نیست" }
-    }
-
+async function sendSms(text: string, to: string, bodyId: number): Promise<SmsResult> {
     try {
-        const response = await fetch(MELIPAYAMAK_PATTERN_URL, {
+        const res = await fetch(BASE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                bodyId: patternCode,
-                to: to,
-                args: args,
+                username: process.env.MELIPAYAMAK_USERNAME,
+                password: process.env.MELIPAYAMAK_PASSWORD, // اینجا apikey میره
+                text,
+                to,
+                bodyId,
             }),
         })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-            console.error("SMS SEND ERROR:", data)
-            return { success: false, message: "خطا در ارسال پیامک", data }
+        const data = await res.json()
+        if (data.RetStatus === 1) {
+            return { success: true, recId: data.Value }
         }
-
-        return { success: true, data }
-    } catch (error) {
-        console.error("SMS SEND EXCEPTION:", error)
-        return { success: false, message: "خطا در اتصال به سرویس پیامک" }
+        return { success: false, error: data.Value }
+    } catch (err) {
+        return { success: false, error: String(err) }
     }
 }
 
-// ============================================================
-// توابع کمکی برای هر نوع پیامک (این‌ها رو توی API Route ها صدا می‌زنیم)
-// ============================================================
-
-export async function sendRegisterSuccessSms(phone: string) {
-    return sendPatternSms(phone, SMS_PATTERNS.REGISTER_SUCCESS, [])
+// کدهای الگوی تاییدشده توی پنل ملی‌پیامک
+const BODY_IDS = {
+    loginCode: 525733,
+    forgotPasswordCode: 525734,
+    orderShipped: 525741,
+    registerSuccess: 525737,
+    orderPlacedCustomer: 525740,
+    newOrderAdmin: 525745,
+    orderPreparing: 525749,
 }
 
-export async function sendLoginOtpSms(phone: string, code: string) {
-    return sendPatternSms(phone, SMS_PATTERNS.LOGIN_OTP, [code])
+export function sendLoginCode(to: string, code: string) {
+    return sendSms(code, to, BODY_IDS.loginCode)
 }
 
-export async function sendForgotPasswordOtpSms(phone: string, code: string) {
-    return sendPatternSms(phone, SMS_PATTERNS.FORGOT_PASSWORD_OTP, [code])
+export function sendForgotPasswordCode(to: string, code: string) {
+    return sendSms(code, to, BODY_IDS.forgotPasswordCode)
 }
 
-export async function sendOrderRegisteredSms(phone: string, customerName: string) {
-    return sendPatternSms(phone, SMS_PATTERNS.ORDER_REGISTERED, [customerName])
+export function sendOrderShipped(to: string, customerName: string, trackingCode: string) {
+    return sendSms(`${customerName};${trackingCode}`, to, BODY_IDS.orderShipped)
 }
 
-export async function sendOrderShippedSms(phone: string, customerName: string, trackingCode: string) {
-    return sendPatternSms(phone, SMS_PATTERNS.ORDER_SHIPPED, [customerName, trackingCode])
+export function sendRegisterSuccess(to: string, customerName: string) {
+    return sendSms(customerName, to, BODY_IDS.registerSuccess)
 }
 
-export async function sendNewOrderAdminSms(adminPhone: string) {
-    return sendPatternSms(adminPhone, SMS_PATTERNS.NEW_ORDER_ADMIN, [])
+export function sendOrderPlacedCustomer(to: string, orderCode: string) {
+    return sendSms(orderCode, to, BODY_IDS.orderPlacedCustomer)
+}
+
+export function sendNewOrderAdmin(to: string, orderCode: string) {
+    return sendSms(orderCode, to, BODY_IDS.newOrderAdmin)
+}
+
+export function sendOrderPreparing(to: string, orderCode: string) {
+    return sendSms(orderCode, to, BODY_IDS.orderPreparing)
 }
