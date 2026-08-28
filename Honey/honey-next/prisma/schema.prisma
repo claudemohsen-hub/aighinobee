@@ -22,6 +22,7 @@ model Order {
   plate       String   @default("")
   floor       String?
   unit        String?
+  trackingCode String?
   userId      Int?
   user        User?    @relation(fields: [userId], references: [id])
 }

@@ -64,7 +64,10 @@ export async function PUT(request: Request) {
 
         const updatedOrder = await prisma.order.update({
             where: { id: data.id },
-            data: { status: data.status },
+            data: {
+                status: data.status,
+                ...(data.trackingCode !== undefined && { trackingCode: data.trackingCode }),
+            },
         })
 
         return Response.json({ success: true, order: updatedOrder })
