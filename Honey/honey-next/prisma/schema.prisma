@@ -36,3 +36,12 @@ model User {
   resetCodeExpiry DateTime?
   orders          Order[]
 }
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  message   String
+  createdAt DateTime @default(now())
+  seen      Boolean  @default(false)
+}
