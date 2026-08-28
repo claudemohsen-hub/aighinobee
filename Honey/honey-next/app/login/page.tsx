@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function LoginPage() {
     const [phone, setPhone] = useState("")
@@ -31,6 +32,9 @@ export default function LoginPage() {
             <button onClick={handleLogin} className="bg-amber-800 text-white px-6 py-3 rounded-lg w-full hover:bg-amber-900 transition">
                 ورود
             </button>
+            <Link href="/forgot-password" className="text-amber-200 text-sm underline mt-4 block text-center">
+                رمز عبور را فراموش کرده‌اید؟
+            </Link>
         </div>
     )
 }
