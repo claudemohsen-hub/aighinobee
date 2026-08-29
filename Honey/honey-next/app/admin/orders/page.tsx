@@ -4,10 +4,11 @@ import { useState, useEffect } from "react"
 export default function OrdersPage() {
     const [orders, setOrders] = useState<any[]>([])
     const [messages, setMessages] = useState<any[]>([])
+    const [users, setUsers] = useState<any[]>([])
     const [password, setPassword] = useState("")
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [checkingSession, setCheckingSession] = useState(true)
-    const [activeTab, setActiveTab] = useState<"pending" | "shipped" | "delivered" | "tickets">("pending")
+    const [activeTab, setActiveTab] = useState<"pending" | "shipped" | "delivered" | "tickets" | "users">("pending")
     const [trackingInputs, setTrackingInputs] = useState<{ [key: number]: string }>({})
     const [showSettings, setShowSettings] = useState(false)
     const [currentPassword, setCurrentPassword] = useState("")
@@ -23,7 +24,6 @@ export default function OrdersPage() {
         return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD
     }
 
-    // موقع بارگذاری صفحه، چک می‌کنیم آیا قبلاً لاگین کرده بودیم یا نه
     useEffect(() => {
         const session = localStorage.getItem(ADMIN_SESSION_KEY)
         if (session === "true") {
@@ -36,14 +36,14 @@ export default function OrdersPage() {
         if (isLoggedIn) {
             fetchOrders()
             fetchMessages()
+            fetchUsers()
         }
     }, [isLoggedIn])
 
-    // هر بار که وارد تب تیکت‌ها می‌شیم، دوباره از سرور می‌گیریم تا تازه باشه
     useEffect(() => {
-        if (isLoggedIn && activeTab === "tickets") {
-            fetchMessages()
-        }
+        if (!isLoggedIn) return
+        if (activeTab === "tickets") fetchMessages()
+        if (activeTab === "users") fetchUsers()
     }, [activeTab])
 
     function fetchOrders() {
@@ -56,6 +56,32 @@ export default function OrdersPage() {
         fetch("/api/contact")
             .then((res) => res.json())
             .then((data) => setMessages(data))
+    }
+
+    function fetchUsers() {
+        fetch("/api/users")
+            .then((res) => res.json())
+            .then((data) => setUsers(data))
+    }
+
+    async function handleDeleteUser(userId: number, userName: string | null, orderCount: number) {
+        const confirmText =
+            orderCount > 0
+                ? `این کاربر (${userName || "بدون نام"}) دارای ${orderCount} سفارش است. با حذف کاربر، سفارش‌ها حذف نمی‌شوند ولی از کاربر جدا می‌شوند. آیا مطمئن هستید؟`
+                : `آیا از حذف کاربر ${userName || "بدون نام"} مطمئن هستید؟`
+
+        if (!confirm(confirmText)) return
+
+        const response = await fetch("/api/users", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: userId }),
+        })
+        const data = await response.json()
+        alert(data.message)
+        if (data.success) {
+            fetchUsers()
+        }
     }
 
     function handleLogin() {
@@ -229,9 +255,15 @@ export default function OrdersPage() {
                 >
                     تیکت‌ها ({messages.length})
                 </button>
+                <button
+                    onClick={() => setActiveTab("users")}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold ${activeTab === "users" ? "bg-amber-800 text-white" : "bg-white/10 text-amber-100"}`}
+                >
+                    کاربران ({users.length})
+                </button>
             </div>
 
-            {activeTab === "tickets" ? (
+            {activeTab === "tickets" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {messages.map((msg) => (
                         <div key={msg.id} className="bg-white rounded-xl shadow-md p-4 text-black">
@@ -258,7 +290,42 @@ export default function OrdersPage() {
                         <p className="text-gray-300 col-span-full text-center py-10">تیکتی وجود ندارد</p>
                     )}
                 </div>
-            ) : (
+            )}
+
+            {activeTab === "users" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {users.map((user) => (
+                        <div key={user.id} className="bg-white rounded-xl shadow-md p-4 text-black">
+                            <div className="flex justify-between items-start mb-2">
+                                <p className="font-bold">{user.name || "بدون نام"}</p>
+                                <span className="text-xs text-gray-500">شناسه: {user.id}</span>
+                            </div>
+                            <p className="text-sm">
+                                موبایل: {user.phone}
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(user.phone)}
+                                    className="text-amber-700 text-xs mr-2 underline"
+                                >
+                                    کپی
+                                </button>
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">تعداد سفارش‌ها: {user.orders.length}</p>
+                            <button
+                                onClick={() => handleDeleteUser(user.id, user.name, user.orders.length)}
+                                className="bg-red-600 text-white text-sm px-4 py-2 rounded-lg w-full hover:bg-red-700 transition mt-3"
+                            >
+                                حذف کاربر
+                            </button>
+                        </div>
+                    ))}
+
+                    {users.length === 0 && (
+                        <p className="text-gray-300 col-span-full text-center py-10">کاربری ثبت‌نام نکرده است</p>
+                    )}
+                </div>
+            )}
+
+            {(activeTab === "pending" || activeTab === "shipped" || activeTab === "delivered") && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {listToShow.map((order) => (
                         <div key={order.id} className="bg-white rounded-xl shadow-md p-4 text-black">
