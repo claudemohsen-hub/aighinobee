@@ -1,42 +1,41 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma"
+import bcrypt from "bcryptjs"
+import { sendRegisterSuccess } from "../../../lib/sms"
 
 export async function POST(request: Request) {
-  const { name, phone, password } = await request.json();
+    try {
+        const data = await request.json()
 
-  if (!name || !phone || !password) {
-    return NextResponse.json(
-      { error: "نام، شماره موبایل و رمز عبور الزامی است" },
-      { status: 400 }
-    );
-  }
+        const existing = await prisma.user.findUnique({
+            where: { phone: data.phone },
+        })
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      phone,
-    },
-  });
+        if (existing) {
+            return Response.json(
+                { success: false, message: "این شماره قبلاً ثبت‌نام کرده است" },
+                { status: 400 }
+            )
+        }
 
-  if (existingUser) {
-    return NextResponse.json(
-      { error: "این شماره موبایل قبلاً ثبت شده است" },
-      { status: 409 }
-    );
-  }
+        const hashedPassword = await bcrypt.hash(data.password, 10)
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+        await prisma.user.create({
+            data: {
+                phone: data.phone,
+                password: hashedPassword,
+                name: data.name,
+            },
+        })
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      phone,
-      password: hashedPassword,
-    },
-  });
+        // ارسال پیامک خوش‌آمد (اگه خطا بده، ثبت‌نام همچنان موفقه)
+        await sendRegisterSuccess(data.phone, data.name)
 
-  return NextResponse.json({
-    message: "ثبت‌نام با موفقیت انجام شد",
-    userId: user.id,
-  });
+        return Response.json({ success: true, message: "ثبت‌نام با موفقیت انجام شد" })
+    } catch (error) {
+        console.error("REGISTER ERROR:", error)
+        return Response.json(
+            { success: false, message: "خطا در ثبت‌نام" },
+            { status: 500 }
+        )
+    }
 }

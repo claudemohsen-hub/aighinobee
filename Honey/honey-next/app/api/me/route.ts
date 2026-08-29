@@ -1,35 +1,22 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma"
+import { cookies } from "next/headers"
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get("userId")?.value;
+    const cookieStore = await cookies()
+    const userId = cookieStore.get("userId")?.value
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: "وارد حساب کاربری نشده‌اید" },
-      { status: 401 }
-    );
-  }
+    if (!userId) {
+        return Response.json({ message: "not logged in" }, { status: 401 })
+    }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: Number(userId),
-    },
-    select: {
-  id: true,
-  phone: true,
-  name: true,
-},
-  });
+    const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+        select: { id: true, phone: true, name: true },
+    })
 
-  if (!user) {
-    return NextResponse.json(
-      { error: "کاربر پیدا نشد" },
-      { status: 404 }
-    );
-  }
+    if (!user) {
+        return Response.json({ message: "not found" }, { status: 401 })
+    }
 
-  return NextResponse.json(user);
+    return Response.json(user)
 }

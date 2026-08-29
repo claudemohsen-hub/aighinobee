@@ -19,14 +19,29 @@ model Order {
   totalPrice  Int
   createdAt   DateTime @default(now())
   status      String   @default("در حال بررسی")
-  unit        String?
   plate       String   @default("")
   floor       String?
+  unit        String?
+  trackingCode String?
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  phone    String @unique
-  password String
-  name     String?
+  id              Int       @id @default(autoincrement())
+  phone           String    @unique
+  password        String
+  name            String?
+  resetCode       String?
+  resetCodeExpiry DateTime?
+  orders          Order[]
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  message   String
+  createdAt DateTime @default(now())
+  seen      Boolean  @default(false)
 }

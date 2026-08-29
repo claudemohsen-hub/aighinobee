@@ -1,73 +1,66 @@
-"use client";
-
-import { useState } from "react";
+"use client"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+    const [name, setName] = useState("")
+    const [phone, setPhone] = useState("")
+    const [password, setPassword] = useState("")
+    const router = useRouter()
 
-  async function handleRegister() {
-    const response = await fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        phone,
-        password,
-      }),
-    });
+    async function handleRegister() {
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, phone, password }),
+        })
+        const data = await response.json()
 
-    const data = await response.json();
-
-    if (response.ok) {
-      setMessage("ثبت‌نام با موفقیت انجام شد");
-    } else {
-      setMessage(data.error);
+        if (response.ok) {
+            const loginResponse = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone, password }),
+            })
+            if (loginResponse.ok) {
+                router.push("/")
+            } else {
+                router.push("/login")
+            }
+        } else {
+            alert(data.message)
+        }
     }
-  }
 
-  return (
-    <main className="p-8">
-      <h1 className="text-2xl font-bold mb-6">ثبت‌نام</h1>
-
-      <div className="flex flex-col gap-4 max-w-sm">
-        <input
-          type="text"
-          placeholder="نام"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border p-2"
-        />
-
-        <input
-          type="text"
-          placeholder="شماره موبایل"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="border p-2"
-        />
-
-        <input
-          type="password"
-          placeholder="رمز عبور"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2"
-        />
-
-        <button
-          onClick={handleRegister}
-          className="bg-amber-800 text-white p-2"
-        >
-          ثبت‌نام
-        </button>
-
-        {message && <p>{message}</p>}
-      </div>
-    </main>
-  );
+    return (
+        <div className="p-6 max-w-sm mx-auto">
+            <h1 className="text-2xl font-bold mb-4 text-amber-200">ثبت‌نام</h1>
+            <input
+                placeholder="نام"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+            />
+            <input
+                type="tel"
+                placeholder="شماره موبایل"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+            />
+            <input
+                type="password"
+                placeholder="رمز عبور"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+            />
+            <button
+                onClick={handleRegister}
+                className="bg-amber-800 text-white px-6 py-3 rounded-lg w-full hover:bg-amber-900 transition"
+            >
+                ثبت‌نام
+            </button>
+        </div>
+    )
 }

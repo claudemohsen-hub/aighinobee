@@ -5,7 +5,7 @@ import { CartContextValue } from "../../Context/CartContext"
 import { provincesAndCities } from "../../data/iranLocations"
 
 export default function Checkout() {
-    const { cart, setCart } = useContext(CartContextValue)
+    const { cart } = useContext(CartContextValue)
     const [selectedProvince, setSelectedProvince] = useState("")
     const [selectedCity, setSelectedCity] = useState("")
     const [phone, setPhone] = useState("")
@@ -17,130 +17,68 @@ export default function Checkout() {
     const [description, setDescription] = useState("")
 
     const total = cart.reduce(
-        (sum: number, item: { price: number; quantity: number }) =>
-            sum + item.price * item.quantity,
+        (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
         0
     )
-
-    const totalQuantity = cart.reduce(
-        (sum: number, item: { quantity: number }) => sum + item.quantity,
-        0
-    )
-
-    const shippingPrice = totalQuantity * 55000
+    const shippingPrice = 220000
     const finalTotal = shippingPrice + total
 
-    function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
-        setPhone(onlyNumbers)
-    }
-
-    function handlePostalCodeChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
-        setPostalCode(onlyNumbers)
-    }
-
-    function handlePlateChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
-        setPlate(onlyNumbers)
-    }
-
-    function handleFloorChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
-        setFloor(onlyNumbers)
-    }
-
-    function handleUnitChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const onlyNumbers = e.target.value.replace(/[^0-9]/g, "")
-        setUnit(onlyNumbers)
+    function onlyDigits(setter: (v: string) => void) {
+        return (e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value.replace(/[^0-9]/g, ""))
     }
 
     async function handlePayment() {
-        if (!selectedProvince) {
-            alert("لطفاً استان را انتخاب کنید")
-            return
-        }
-
-        if (!selectedCity) {
-            alert("لطفاً شهر را انتخاب کنید")
-            return
-        }
-
-        if (!address.trim()) {
-            alert("لطفاً آدرس را وارد کنید")
-            return
-        }
-
-        if (!plate.trim()) {
-            alert("لطفاً پلاک را وارد کنید")
-            return
-        }
-
-        if (!phone.trim()) {
-            alert("لطفاً شماره موبایل را وارد کنید")
-            return
-        }
-
-        if (!postalCode.trim()) {
-            alert("لطفاً کد پستی را وارد کنید")
-            return
-        }
-
         if (cart.length === 0) {
             alert("سبد خرید شما خالی است")
             return
         }
 
-        try {
-            const response = await fetch("/api/order", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    cart,
-                    total: finalTotal,
-                    phone,
-                    address,
-                    plate,
-                    floor,
-                    unit,
-                    province: selectedProvince,
-                    city: selectedCity,
-                    postalCode,
-                    description,
-                }),
-            })
-
-            const text = await response.text()
-
-            console.log("STATUS:", response.status)
-            console.log("RESPONSE:", text)
-
-            if (!response.ok) {
-                alert(`خطا در ثبت سفارش: ${response.status}`)
-                return
-            }
-
-            if (!text) {
-                alert("سرور پاسخ خالی برگرداند")
-                return
-            }
-
-            const result = JSON.parse(text)
-
-            alert(result.message)
-        } catch (error) {
-            console.error("Payment error:", error)
-            alert("خطایی هنگام ثبت سفارش رخ داد")
+        if (!selectedProvince) {
+            alert("لطفاً استان را انتخاب کنید")
+            return
         }
+        if (!selectedCity) {
+            alert("لطفاً شهر را انتخاب کنید")
+            return
+        }
+        if (!address.trim()) {
+            alert("لطفاً آدرس را وارد کنید")
+            return
+        }
+        if (!plate.trim()) {
+            alert("لطفاً پلاک را وارد کنید")
+            return
+        }
+        if (!phone.trim() || phone.length !== 11) {
+            alert("لطفاً شماره موبایل معتبر (۱۱ رقم) وارد کنید")
+            return
+        }
+
+        const response = await fetch("/api/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                cart,
+                total: finalTotal,
+                phone,
+                address,
+                plate,
+                floor,
+                unit,
+                province: selectedProvince,
+                city: selectedCity,
+                postalCode,
+                description,
+            }),
+        })
+
+        const result = await response.json()
+        alert(result.message)
     }
 
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">
-                پرداخت
-            </h1>
+            <h1 className="text-2xl font-bold mb-4">پرداخت</h1>
 
             <div className="max-w-md">
                 <select
@@ -149,7 +87,6 @@ export default function Checkout() {
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                 >
                     <option value="">انتخاب استان</option>
-
                     {Object.keys(provincesAndCities).map((province) => (
                         <option key={province} value={province}>
                             {province}
@@ -164,7 +101,6 @@ export default function Checkout() {
                     onChange={(e) => setSelectedCity(e.target.value)}
                 >
                     <option value="">انتخاب شهر</option>
-
                     {selectedProvince &&
                         provincesAndCities[selectedProvince].map((city) => (
                             <option key={city} value={city}>
@@ -187,25 +123,23 @@ export default function Checkout() {
                         placeholder="پلاک"
                         className="border border-gray-300 rounded-lg p-3 w-full text-center"
                         value={plate}
-                        onChange={handlePlateChange}
+                        onChange={onlyDigits(setPlate)}
                         maxLength={4}
                     />
-
                     <input
                         type="text"
                         placeholder="طبقه"
                         className="border border-gray-300 rounded-lg p-3 w-full text-center"
                         value={floor}
-                        onChange={handleFloorChange}
+                        onChange={onlyDigits(setFloor)}
                         maxLength={3}
                     />
-
                     <input
                         type="text"
                         placeholder="واحد"
                         className="border border-gray-300 rounded-lg p-3 w-full text-center"
                         value={unit}
-                        onChange={handleUnitChange}
+                        onChange={onlyDigits(setUnit)}
                         maxLength={3}
                     />
                 </div>
@@ -215,7 +149,7 @@ export default function Checkout() {
                     placeholder="شماره موبایل (مثال: 09123456789)"
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                     value={phone}
-                    onChange={handlePhoneChange}
+                    onChange={onlyDigits(setPhone)}
                     maxLength={11}
                 />
 
@@ -224,7 +158,7 @@ export default function Checkout() {
                     placeholder="کد پستی"
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4"
                     value={postalCode}
-                    onChange={handlePostalCodeChange}
+                    onChange={onlyDigits(setPostalCode)}
                     maxLength={10}
                 />
 
@@ -236,27 +170,18 @@ export default function Checkout() {
                 />
             </div>
 
-            {cart.length === 0 && (
-                <p>سبد خرید خالی است</p>
-            )}
+            {cart.length === 0 && <p>سبد خرید خالی است</p>}
 
             {cart.map(
                 (
-                    item: {
-                        name: string
-                        price: number
-                        quantity: number
-                    },
+                    item: { name: string; price: number; quantity: number },
                     index: number
                 ) => (
                     <div
                         key={index}
                         className="flex justify-between items-center border-b py-3"
                     >
-                        <span>
-                            {item.name} ({item.quantity})
-                        </span>
-
+                        <span>{item.name} ({item.quantity})</span>
                         <span>
                             {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
                         </span>
@@ -269,11 +194,9 @@ export default function Checkout() {
                     <div className="mt-5 font-bold">
                         جمع کل: {total.toLocaleString("fa-IR")} تومان
                     </div>
-
                     <div className="mt-6 font-normal">
-                        هزینه پستی: {shippingPrice.toLocaleString("fa-IR")} تومان
+                        هزینه تیپاکس (پس‌کرایه): {shippingPrice.toLocaleString("fa-IR")} تومان
                     </div>
-
                     <div className="mt-6 text-emerald-600 font-normal">
                         هزینه پرداختی: {finalTotal.toLocaleString("fa-IR")} تومان
                     </div>

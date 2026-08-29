@@ -5,29 +5,23 @@ import { useState, createContext, useEffect } from "react"
 export const CartContextValue = createContext<any>(null)
 
 function CartContext({ children }: { children: React.ReactNode }) {
-
     const [cart, setCart] = useState<any[]>([])
     const [loaded, setLoaded] = useState(false)
 
-    // خواندن اولیه
     useEffect(() => {
         const savedCart = localStorage.getItem("cart")
-
         if (savedCart) {
             setCart(JSON.parse(savedCart))
         }
-
         setLoaded(true)
     }, [])
 
-    // ذخیره فقط بعد از خواندن اولیه
     useEffect(() => {
         if (!loaded) return
-
         localStorage.setItem("cart", JSON.stringify(cart))
     }, [cart, loaded])
 
-    function addToCart(product: { id: number; name: string; price: number }) {
+    function addToCart(product: { id: number; name: string; price: number; image: string; description: string }) {
         const existing = cart.find((item: any) => item.id === product.id)
 
         if (existing) {

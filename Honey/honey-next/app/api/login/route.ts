@@ -1,53 +1,44 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma"
+import bcrypt from "bcryptjs"
+import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
-  const { phone, password } = await request.json();
+    try {
+        const data = await request.json()
 
-  if (!phone || !password) {
-    return NextResponse.json(
-      { error: "شماره موبایل و رمز عبور الزامی است" },
-      { status: 400 }
-    );
-  }
+        const user = await prisma.user.findUnique({
+            where: { phone: data.phone },
+        })
 
-  const user = await prisma.user.findUnique({
-    where: {
-      phone,
-    },
-  });
+        if (!user) {
+            return Response.json(
+                { success: false, message: "شماره یا رمز عبور اشتباه است" },
+                { status: 400 }
+            )
+        }
 
-  if (!user) {
-    return NextResponse.json(
-      { error: "شماره موبایل یا رمز عبور اشتباه است" },
-      { status: 401 }
-    );
-  }
+        const isValid = await bcrypt.compare(data.password, user.password)
 
-  const passwordIsCorrect = await bcrypt.compare(
-    password,
-    user.password
-  );
+        if (!isValid) {
+            return Response.json(
+                { success: false, message: "شماره یا رمز عبور اشتباه است" },
+                { status: 400 }
+            )
+        }
 
-  if (!passwordIsCorrect) {
-    return NextResponse.json(
-      { error: "شماره موبایل یا رمز عبور اشتباه است" },
-      { status: 401 }
-    );
-  }
+        const cookieStore = await cookies()
+        cookieStore.set("userId", String(user.id), {
+            httpOnly: true,
+            sameSite: "lax",
+            path: "/",
+        })
 
-  const response = NextResponse.json({
-  message: "ورود با موفقیت انجام شد",
-  userId: user.id,
-});
-
-response.cookies.set("userId", String(user.id), {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  path: "/",
-});
-
-return response;
+        return Response.json({ success: true, message: "ورود موفقیت‌آمیز بود" })
+    } catch (error) {
+        console.error("LOGIN ERROR:", error)
+        return Response.json(
+            { success: false, message: "خطا در ورود" },
+            { status: 500 }
+        )
+    }
 }
