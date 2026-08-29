@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "dkstatics-public.digikala.com",
       },
+      {
+        protocol: "https",
+        hostname: "media.iginobee.com",
+      },
     ],
   },
 };

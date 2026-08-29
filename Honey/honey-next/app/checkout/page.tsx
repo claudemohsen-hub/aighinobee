@@ -20,8 +20,7 @@ export default function Checkout() {
         (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
         0
     )
-    const shippingPrice = 220000
-    const finalTotal = shippingPrice + total
+    const finalTotal = total
 
     function onlyDigits(setter: (v: string) => void) {
         return (e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value.replace(/[^0-9]/g, ""))
@@ -194,11 +193,8 @@ export default function Checkout() {
                     <div className="mt-5 font-bold">
                         جمع کل: {total.toLocaleString("fa-IR")} تومان
                     </div>
-                    <div className="mt-6 font-normal">
-                        هزینه تیپاکس (پس‌کرایه): {shippingPrice.toLocaleString("fa-IR")} تومان
-                    </div>
-                    <div className="mt-6 text-emerald-600 font-normal">
-                        هزینه پرداختی: {finalTotal.toLocaleString("fa-IR")} تومان
+                    <div className="mt-6 font-normal text-amber-200">
+                        ارسال با تیپاکس بصورت پس‌کرایه
                     </div>
 
                     <button
