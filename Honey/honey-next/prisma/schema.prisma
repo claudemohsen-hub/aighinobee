@@ -28,14 +28,16 @@ model Order {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  phone           String    @unique
-  password        String
-  name            String?
-  resetCode       String?
-  resetCodeExpiry DateTime?
-  orders          Order[]
+  id             Int       @id @default(autoincrement())
+  phone          String    @unique
+  name           String?
+  loginCode      String?
+  loginCodeExpiry DateTime?
+  createdAt      DateTime  @default(now())
+  orders         Order[]
 }
+
+
 
 model ContactMessage {
   id        Int      @id @default(autoincrement())
