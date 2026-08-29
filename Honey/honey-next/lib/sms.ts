@@ -5,21 +5,18 @@ const BASE_URL = `https://console.melipayamak.com/api/send/shared/${TOKEN}`
 
 async function sendSms(args: string[], to: string, bodyId: number): Promise<SmsResult> {
     try {
-        // تبدیل شماره به فرمت مورد قبول ملی‌پیامک (بدون صفر ابتدایی)
-        const normalizedTo = to.startsWith("0") ? to.substring(1) : to
-
         const res = await fetch(BASE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 bodyId,
-                to: normalizedTo,
+                to,
                 args,
             }),
         })
         const data = await res.json()
 
-        console.log("SMS RESPONSE:", JSON.stringify(data), "| to:", normalizedTo, "| bodyId:", bodyId)
+        console.log("SMS RESPONSE:", JSON.stringify(data), "| to:", to, "| bodyId:", bodyId)
 
         if (data.recId && Number(data.recId) > 0) {
             return { success: true, recId: String(data.recId) }
