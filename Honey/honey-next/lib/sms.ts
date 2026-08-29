@@ -30,7 +30,7 @@ async function sendSms(args: string[], to: string, bodyId: number): Promise<SmsR
 
 // کدهای الگوی تاییدشده توی پنل ملی‌پیامک
 const BODY_IDS = {
-    loginCode: 525737,
+    loginCode: 525733,
     forgotPasswordCode: 525734,
     orderShipped: 525741,
     registerSuccess: 525737,
