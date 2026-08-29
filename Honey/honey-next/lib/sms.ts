@@ -1,26 +1,26 @@
 type SmsResult = { success: boolean; recId?: string; error?: string }
 
-// آدرس API کنسول ملی‌پیامک — توکن از .env خوانده می‌شود
 const TOKEN = process.env.MELIPAYAMAK_TOKEN
 const BASE_URL = `https://console.melipayamak.com/api/send/shared/${TOKEN}`
 
 async function sendSms(args: string[], to: string, bodyId: number): Promise<SmsResult> {
     try {
+        // تبدیل شماره به فرمت مورد قبول ملی‌پیامک (بدون صفر ابتدایی)
+        const normalizedTo = to.startsWith("0") ? to.substring(1) : to
+
         const res = await fetch(BASE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 bodyId,
-                to,
+                to: normalizedTo,
                 args,
             }),
         })
         const data = await res.json()
 
-        // این لاگ توی Vercel > Logs دیده می‌شه و برای عیب‌یابی کمک می‌کنه
-        console.log("SMS RESPONSE:", JSON.stringify(data), "| to:", to, "| bodyId:", bodyId)
+        console.log("SMS RESPONSE:", JSON.stringify(data), "| to:", normalizedTo, "| bodyId:", bodyId)
 
-        // اگه recId یه عدد معتبر باشه، ارسال موفق بوده
         if (data.recId && Number(data.recId) > 0) {
             return { success: true, recId: String(data.recId) }
         }
