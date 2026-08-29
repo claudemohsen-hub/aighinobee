@@ -21,7 +21,13 @@ export async function POST(request: Request) {
                 { status: 400 }
             )
         }
-
+console.log("VERIFY DEBUG:", {
+    phone,
+    enteredCode: code,
+    savedCode: user.loginCode,
+    match: user.loginCode === code,
+    expiry: user.loginCodeExpiry,
+})
         if (user.loginCode !== code) {
             return Response.json({ success: false, message: "کد وارد شده اشتباه است" }, { status: 400 })
         }
