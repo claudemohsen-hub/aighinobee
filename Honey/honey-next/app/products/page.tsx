@@ -1,110 +1,78 @@
 "use client"
-import { useEffect, useState, useContext } from "react"
-import { useParams } from "next/navigation"
-import { CartContextValue } from "../../../Context/CartContext"
+import Link from "next/link"
+import { useEffect, useState } from "react"
 
-export default function ProductDetail() {
-    const params = useParams()
-    const { addToCart } = useContext(CartContextValue) as any
-    const [product, setProduct] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-    const [activeImage, setActiveImage] = useState(0)
+export default function Home() {
+    const [products, setProducts] = useState<any[]>([])
 
     useEffect(() => {
-        fetch(`/api/products/${params.id}`)
+        fetch("/api/products")
             .then((res) => res.json())
             .then((data) => {
-                if (data && !data.message) setProduct(data)
-                setLoading(false)
+                setProducts(Array.isArray(data) ? data.filter((p) => p.isActive !== false).slice(0, 3) : [])
             })
-    }, [params.id])
-
-    if (loading) return <div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>
-    if (!product) return <div className="p-6 text-center text-amber-200">محصول پیدا نشد</div>
-
-    const images = product.images?.length ? product.images : [{ url: "/placeholder.png" }]
-
-    const specs = [
-        { label: "وزن", value: product.weight },
-        { label: "نوع عسل", value: product.honeyType },
-        { label: "سال تولید", value: product.productYear },
-        { label: "تاریخ انقضا", value: product.expiry },
-        { label: "خواص", value: product.benefits },
-        { label: "مناسب برای", value: product.suitableFor },
-    ].filter((s) => s.value)
+            .catch(() => setProducts([]))
+    }, [])
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-8">
-                {/* عکس - سمت چپ */}
-                <div className="md:w-1/2 order-1">
-                    <div className="rounded-xl overflow-hidden bg-white/5 border border-amber-900/30">
-                        <img src={images[activeImage].url} alt={product.name} className="w-full h-80 object-cover" />
-                    </div>
-                    {images.length > 1 && (
-                        <div className="flex gap-2 mt-3 overflow-x-auto">
-                            {images.map((img: any, index: number) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setActiveImage(index)}
-                                    className={`shrink-0 rounded-lg overflow-hidden border-2 ${
-                                        activeImage === index ? "border-amber-500" : "border-transparent"
-                                    }`}
-                                >
-                                    <img src={img.url} alt="" className="w-16 h-16 object-cover" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* اطلاعات و خرید - سمت راست */}
-                <div className="md:w-1/2 order-2 flex flex-col">
-                    <h1 className="text-2xl font-bold text-amber-200">{product.name}</h1>
-
-                    {product.shortDesc && (
-                        <p className="text-amber-50 mt-3 leading-7 whitespace-pre-line">{product.shortDesc}</p>
-                    )}
-
-                    <p className="text-2xl font-bold text-amber-100 mt-5">
-                        {product.price.toLocaleString("fa-IR")} تومان
-                    </p>
-
-                    <button
-                        onClick={() => addToCart(product)}
-                        className="bg-amber-800 text-white px-6 py-3 rounded-lg mt-4 hover:bg-amber-900 transition font-semibold"
-                    >
-                        افزودن به سبد خرید
-                    </button>
-
-                    {product.description && (
-                        <div className="mt-6">
-                            <h2 className="font-bold text-amber-200 mb-2">توضیحات بیشتر</h2>
-                            <p className="text-amber-50 leading-7 whitespace-pre-line text-sm">{product.description}</p>
-                        </div>
-                    )}
-                </div>
+        <div>
+            <div className="bg-gradient-to-b from-amber-900 to-amber-800 text-white text-center py-24 px-6">
+                <p className="inline-block bg-white/10 text-amber-200 text-sm px-4 py-1 rounded-full mb-4">
+                    عسل خالص ایرانی
+                </p>
+                <h1 className="text-5xl font-bold mb-4">آیگینوبی</h1>
+                <p className="text-lg max-w-xl mx-auto mb-8 text-amber-100">
+                    عسل طبیعی و خالص، مستقیم از کندوهای کوهستانی به خانه‌ی شما
+                </p>
+                <Link
+                    href="/products"
+                    className="bg-amber-200 text-amber-900 px-8 py-3 rounded-lg font-bold hover:bg-white transition"
+                >
+                    مشاهده محصولات
+                </Link>
             </div>
 
-            {/* تب ویژگی‌های محصول */}
-            {specs.length > 0 && (
-                <div className="mt-10">
-                    <h2 className="font-bold text-amber-200 text-lg mb-4 border-b border-amber-900/40 pb-2">
-                        ویژگی‌های محصول
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {specs.map((spec) => (
-                            <div
-                                key={spec.label}
-                                className="flex justify-between bg-white/5 border border-amber-900/30 rounded-lg px-4 py-3"
-                            >
-                                <span className="text-amber-300 text-sm font-semibold">{spec.label}</span>
-                                <span className="text-amber-50 text-sm">{spec.value}</span>
-                            </div>
-                        ))}
+            <div className="p-6 max-w-6xl mx-auto">
+                <h2 className="text-2xl font-bold mb-8 text-amber-200 text-center">
+                    محصولات پرفروش
+                </h2>
+
+                {products.length === 0 ? (
+                    <p className="text-center text-amber-100">در حال بارگذاری محصولات...</p>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {products.map((product) => {
+                            const mainImage = product.images?.[0]?.url
+                            return (
+                                <Link
+                                    key={product.id}
+                                    href={`/products/${product.id}`}
+                                    className="bg-white rounded-xl shadow-md p-5 hover:shadow-xl transition flex flex-col items-center text-center"
+                                >
+                                    {mainImage ? (
+                                        <img
+                                            src={mainImage}
+                                            alt={product.name}
+                                            className="rounded-lg object-cover w-full h-40"
+                                        />
+                                    ) : (
+                                        <div className="rounded-lg bg-gray-200 w-full h-40 flex items-center justify-center text-gray-400 text-sm">
+                                            بدون تصویر
+                                        </div>
+                                    )}
+                                    <h3 className="text-lg font-bold text-amber-900 mt-3">{product.name}</h3>
+                                    {product.weight && (
+                                        <p className="text-xs text-gray-500 mt-1">{product.weight}</p>
+                                    )}
+                                    <p className="mt-2 text-gray-700">
+                                        {product.price.toLocaleString("fa-IR")} تومان
+                                    </p>
+                                </Link>
+                            )
+                        })}
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     )
 }
