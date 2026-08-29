@@ -50,13 +50,15 @@ export default function Home() {
                                     className="bg-white rounded-xl shadow-md p-5 hover:shadow-xl transition flex flex-col items-center text-center"
                                 >
                                     {mainImage ? (
-                                        <img
-                                            src={mainImage}
-                                            alt={product.name}
-                                            className="rounded-lg object-cover w-full h-40"
-                                        />
+                                        <div className="w-full h-44 flex items-center justify-center bg-amber-50 rounded-lg overflow-hidden">
+                                            <img
+                                                src={mainImage}
+                                                alt={product.name}
+                                                className="max-w-full max-h-full object-contain"
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className="rounded-lg bg-gray-200 w-full h-40 flex items-center justify-center text-gray-400 text-sm">
+                                        <div className="w-full h-44 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
                                             بدون تصویر
                                         </div>
                                     )}

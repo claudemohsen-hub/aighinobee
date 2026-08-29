@@ -17,6 +17,7 @@ export default function ProductDetail() {
                 if (data && !data.message) setProduct(data)
                 setLoading(false)
             })
+            .catch(() => setLoading(false))
     }, [params.id])
 
     if (loading) return <div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>
@@ -39,9 +40,17 @@ export default function ProductDetail() {
                 <div className="md:w-1/2">
                     <div className="rounded-xl overflow-hidden bg-white/5 border border-amber-900/30">
                         {images.length > 0 ? (
-                            <img src={images[activeImage].url} alt={product.name} className="w-full h-80 object-cover" />
+                            <div className="w-full h-80 flex items-center justify-center overflow-hidden">
+                                <img
+                                    src={images[activeImage].url}
+                                    alt={product.name}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            </div>
                         ) : (
-                            <div className="w-full h-80 flex items-center justify-center text-amber-100">بدون تصویر</div>
+                            <div className="w-full h-80 flex items-center justify-center text-amber-100">
+                                بدون تصویر
+                            </div>
                         )}
                     </div>
                     {images.length > 1 && (
@@ -50,11 +59,11 @@ export default function ProductDetail() {
                                 <button
                                     key={index}
                                     onClick={() => setActiveImage(index)}
-                                    className={`shrink-0 rounded-lg overflow-hidden border-2 ${
+                                    className={`shrink-0 rounded-lg overflow-hidden border-2 bg-white/5 w-16 h-16 flex items-center justify-center ${
                                         activeImage === index ? "border-amber-500" : "border-transparent"
                                     }`}
                                 >
-                                    <img src={img.url} alt="" className="w-16 h-16 object-cover" />
+                                    <img src={img.url} alt="" className="max-w-full max-h-full object-contain" />
                                 </button>
                             ))}
                         </div>

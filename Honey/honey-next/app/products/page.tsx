@@ -39,9 +39,15 @@ export default function ProductsPage() {
                         >
                             <Link href={`/products/${product.id}`}>
                                 {mainImage ? (
-                                    <img src={mainImage} alt={product.name} className="w-full h-48 object-cover" />
+                                    <div className="w-full h-52 flex items-center justify-center bg-white/5 overflow-hidden">
+                                        <img
+                                            src={mainImage}
+                                            alt={product.name}
+                                            className="max-w-full max-h-full object-contain"
+                                        />
+                                    </div>
                                 ) : (
-                                    <div className="w-full h-48 bg-white/10 flex items-center justify-center text-amber-100 text-sm">
+                                    <div className="w-full h-52 bg-white/10 flex items-center justify-center text-amber-100 text-sm">
                                         بدون تصویر
                                     </div>
                                 )}
