@@ -22,7 +22,7 @@ export default function Home() {
                 </p>
                 <h1 className="text-5xl font-bold mb-4">آیگینوبی</h1>
                 <p className="text-lg max-w-xl mx-auto mb-8 text-amber-100">
-                    عسل طبیعی و خالص، مستقیم از کندوهای کوهستانی به خانه‌ی شما
+                    عسل طبیعی و خالص، مستقیم از کندوهای خراسان جنوبی به خانه‌ی شما
                 </p>
                 <Link
                     href="/products"
