@@ -52,7 +52,7 @@ export default function Navbar() {
                 {!loading && !user && (
                     <>
                         <Link href="/login" className="hover:text-amber-300 transition">ورود</Link>
-                        <Link href="/register" className="hover:text-amber-300 transition">ثبت‌نام</Link>
+                       
                     </>
                 )}
 
