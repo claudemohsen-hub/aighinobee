@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     try {
         const data = await request.json()
 
-        // اعتبارسنجی سمت سرور — حتی اگه کاربر فرم رو دور بزنه، اینجا جلوش گرفته می‌شه
+        // اعتبارسنجی سمت سرور
         if (!Array.isArray(data.cart) || data.cart.length === 0) {
             return Response.json({ success: false, message: "سبد خرید خالی است" }, { status: 400 })
         }
@@ -49,9 +49,10 @@ export async function POST(request: Request) {
             },
         })
 
-        sendOrderPlacedCustomer(data.phone, String(order.id))
+        // پیامک به مشتری و ادمین
+        await sendOrderPlacedCustomer(data.phone, String(order.id))
         if (process.env.ADMIN_PHONE) {
-            sendNewOrderAdmin(process.env.ADMIN_PHONE, String(order.id))
+            await sendNewOrderAdmin(process.env.ADMIN_PHONE, String(order.id))
         }
 
         return Response.json({
@@ -99,13 +100,14 @@ export async function PUT(request: Request) {
             },
         })
 
+        // وقتی وضعیت "ارسال شد" می‌شه، پیامک کد رهگیری برای مشتری
         if (data.status === "ارسال شد" && data.trackingCode) {
             let customerName = "مشتری گرامی"
             if (updatedOrder.userId) {
                 const user = await prisma.user.findUnique({ where: { id: updatedOrder.userId } })
                 if (user?.name) customerName = user.name
             }
-            sendOrderShipped(updatedOrder.phone, customerName, data.trackingCode)
+            await sendOrderShipped(updatedOrder.phone, customerName, data.trackingCode)
         }
 
         return Response.json({ success: true, order: updatedOrder })

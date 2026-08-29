@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
-        const user = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 phone: data.phone,
                 password: hashedPassword,
@@ -27,7 +27,8 @@ export async function POST(request: Request) {
             },
         })
 
-        sendRegisterSuccess(data.phone, data.name)
+        // ارسال پیامک خوش‌آمد (اگه خطا بده، ثبت‌نام همچنان موفقه)
+        await sendRegisterSuccess(data.phone, data.name)
 
         return Response.json({ success: true, message: "ثبت‌نام با موفقیت انجام شد" })
     } catch (error) {

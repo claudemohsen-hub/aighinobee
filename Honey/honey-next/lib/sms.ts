@@ -9,22 +9,28 @@ async function sendSms(text: string, to: string, bodyId: number): Promise<SmsRes
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: process.env.MELIPAYAMAK_USERNAME,
-                password: process.env.MELIPAYAMAK_PASSWORD,
+                password: process.env.MELIPAYAMAK_PASSWORD, // اینجا apikey میره
                 text,
                 to,
                 bodyId,
             }),
         })
         const data = await res.json()
+
+        // این لاگ توی Vercel > Logs دیده می‌شه و برای عیب‌یابی کمک می‌کنه
+        console.log("SMS RESPONSE:", JSON.stringify(data), "| to:", to, "| bodyId:", bodyId)
+
         if (data.RetStatus === 1) {
             return { success: true, recId: data.Value }
         }
         return { success: false, error: data.Value }
     } catch (err) {
+        console.error("SMS EXCEPTION:", err)
         return { success: false, error: String(err) }
     }
 }
 
+// کدهای الگوی تاییدشده توی پنل ملی‌پیامک
 const BODY_IDS = {
     loginCode: 525733,
     forgotPasswordCode: 525734,
