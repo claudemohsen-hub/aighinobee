@@ -47,9 +47,14 @@ export default function LoginPage() {
         }
     }
 
-    async function handleVerifyCode() {
+        async function handleVerifyCode() {
         if (!code.trim()) {
             alert("لطفاً کد ارسال‌شده را وارد کنید")
+            return
+        }
+
+        if (needsName && !name.trim()) {
+            alert("لطفاً نام خود را وارد کنید")
             return
         }
 
@@ -63,8 +68,7 @@ export default function LoginPage() {
             const data = await res.json()
 
             if (data.success) {
-                // اگر کاربر جدید است و هنوز نام نداده، نام بگیریم
-                if (data.isNewUser && !name.trim()) {
+                if (data.needsName) {
                     setNeedsName(true)
                     setLoading(false)
                     return

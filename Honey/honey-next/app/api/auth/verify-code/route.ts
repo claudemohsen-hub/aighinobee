@@ -33,9 +33,14 @@ export async function POST(request: Request) {
             )
         }
 
-        // کاربر جدید محسوب می‌شود اگر هنوز نامی ثبت نکرده باشد
         const isNewUser = !user.name
 
+        // اگر کاربر جدید است و هنوز نام نداده، کد را نگه می‌داریم و فقط درخواست نام می‌کنیم
+        if (isNewUser && !name) {
+            return Response.json({ success: true, isNewUser: true, needsName: true })
+        }
+
+        // حالا که همه‌چیز کامل است، کد را پاک و کاربر را وارد می‌کنیم
         const updatedUser = await prisma.user.update({
             where: { phone },
             data: {
@@ -45,7 +50,6 @@ export async function POST(request: Request) {
             },
         })
 
-        // پیامک خوش‌آمد فقط برای کاربر تازه‌ثبت‌نام‌شده
         if (isNewUser && name) {
             await sendRegisterSuccess(phone, name)
         }
@@ -61,6 +65,7 @@ export async function POST(request: Request) {
             success: true,
             message: "ورود موفقیت‌آمیز بود",
             isNewUser,
+            needsName: false,
         })
     } catch (error) {
         console.error("VERIFY CODE ERROR:", error)
