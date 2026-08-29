@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 
-type ImageItem = { url: string; filename: string; alt?: string }
+type ImageItem = { url: string; filename?: string; alt?: string }
 
 const EMPTY_FORM = {
     id: null as number | null,
@@ -24,7 +24,7 @@ export default function AdminProductsPage() {
     const [checkingSession, setCheckingSession] = useState(true)
     const [form, setForm] = useState(EMPTY_FORM)
     const [images, setImages] = useState<ImageItem[]>([])
-    const [uploading, setUploading] = useState(false)
+    const [newImageUrl, setNewImageUrl] = useState("")
     const [saving, setSaving] = useState(false)
     const [showForm, setShowForm] = useState(false)
 
@@ -65,6 +65,7 @@ export default function AdminProductsPage() {
     function resetForm() {
         setForm(EMPTY_FORM)
         setImages([])
+        setNewImageUrl("")
         setShowForm(false)
     }
 
@@ -87,28 +88,15 @@ export default function AdminProductsPage() {
         window.scrollTo({ top: 0, behavior: "smooth" })
     }
 
-    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-        const files = e.target.files
-        if (!files || files.length === 0) return
-
-        setUploading(true)
-        for (const file of Array.from(files)) {
-            const formData = new FormData()
-            formData.append("file", file)
-            try {
-                const res = await fetch("/api/upload", { method: "POST", body: formData })
-                const data = await res.json()
-                if (data.success) {
-                    setImages((prev) => [...prev, { url: data.url, filename: data.filename, alt: form.name }])
-                } else {
-                    alert("خطا در آپلود: " + (data.message || "نامشخص"))
-                }
-            } catch (err) {
-                alert("خطا در آپلود تصویر")
-            }
+    function addImageLink() {
+        const url = newImageUrl.trim()
+        if (!url) return
+        if (!url.startsWith("http")) {
+            alert("لطفاً یک لینک معتبر وارد کنید (با http شروع شود)")
+            return
         }
-        setUploading(false)
-        e.target.value = ""
+        setImages((prev) => [...prev, { url, alt: form.name }])
+        setNewImageUrl("")
     }
 
     function removeImage(index: number) {
@@ -152,7 +140,7 @@ export default function AdminProductsPage() {
     }
 
     async function handleDeleteProduct(id: number, name: string) {
-        if (!confirm(`آیا از حذف محصول «${name}» مطمئن هستید؟ تصاویرش هم از سرور حذف می‌شوند.`)) return
+        if (!confirm(`آیا از حذف محصول «${name}» مطمئن هستید؟`)) return
 
         const res = await fetch("/api/products", {
             method: "DELETE",
@@ -309,18 +297,29 @@ export default function AdminProductsPage() {
                         </div>
                     </div>
 
-                    <h3 className="font-bold mt-6 mb-2 text-amber-800">تصاویر محصول</h3>
-                    <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        multiple
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className="mb-3"
-                    />
-                    {uploading && <p className="text-sm text-gray-500">در حال آپلود...</p>}
+                    <h3 className="font-bold mt-6 mb-2 text-amber-800">تصاویر محصول (درج لینک)</h3>
+                    <p className="text-xs text-gray-500 mb-2">
+                        عکس را در هاست خود آپلود کنید و لینک کامل آن را اینجا وارد کنید (مثلاً https://media.iginobee.com/uploads/products/name.jpg)
+                    </p>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={newImageUrl}
+                            onChange={(e) => setNewImageUrl(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && addImageLink()}
+                            placeholder="لینک عکس..."
+                            className="border border-gray-300 rounded-lg p-2 flex-1 text-black bg-white"
+                            dir="ltr"
+                        />
+                        <button
+                            onClick={addImageLink}
+                            className="bg-amber-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-900 transition whitespace-nowrap"
+                        >
+                            افزودن لینک
+                        </button>
+                    </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
                         {images.map((img, index) => (
                             <div key={index} className="relative border rounded-lg overflow-hidden">
                                 <img src={img.url} alt="" className="w-full h-24 object-cover" />
@@ -330,14 +329,16 @@ export default function AdminProductsPage() {
                                     </span>
                                 )}
                                 <div className="flex justify-between bg-gray-100 p-1">
-                                    <button onClick={() => moveImage(index, -1)} className="text-xs px-1" title="بالا">↑</button>
-                                    <button onClick={() => moveImage(index, 1)} className="text-xs px-1" title="پایین">↓</button>
+                                    <button onClick={() => moveImage(index, -1)} className="text-xs px-1" title="جابجایی">↑</button>
+                                    <button onClick={() => moveImage(index, 1)} className="text-xs px-1" title="جابجایی">↓</button>
                                     <button onClick={() => removeImage(index)} className="text-xs text-red-600 px-1">حذف</button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">اولین تصویر به‌عنوان تصویر اصلی نمایش داده می‌شود. با فلش‌ها ترتیب را عوض کنید.</p>
+                    {images.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-2">اولین تصویر به‌عنوان تصویر اصلی نمایش داده می‌شود. با فلش‌ها ترتیب را عوض کنید.</p>
+                    )}
 
                     <div className="flex gap-3 mt-6">
                         <button
