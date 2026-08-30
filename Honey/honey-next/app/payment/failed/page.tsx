@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
 const REASON_MESSAGES: Record<string, string> = {
@@ -10,7 +11,7 @@ const REASON_MESSAGES: Record<string, string> = {
     error: "خطایی در بررسی پرداخت رخ داد.",
 }
 
-export default function PaymentFailedPage() {
+function FailedContent() {
     const searchParams = useSearchParams()
     const reason = searchParams.get("reason") || "error"
 
@@ -29,4 +30,12 @@ export default function PaymentFailedPage() {
             </Link>
         </div>
     )
-}   
+}
+
+export default function PaymentFailedPage() {
+    return (
+        <Suspense fallback={<div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>}>
+            <FailedContent />
+        </Suspense>
+    )
+}

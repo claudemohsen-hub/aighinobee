@@ -1,8 +1,9 @@
 "use client"
 import Link from "next/link"
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-export default function PaymentSuccessPage() {
+function SuccessContent() {
     const searchParams = useSearchParams()
     const orderId = searchParams.get("orderId")
 
@@ -23,5 +24,13 @@ export default function PaymentSuccessPage() {
                 بازگشت به صفحه اصلی
             </Link>
         </div>
+    )
+}
+
+export default function PaymentSuccessPage() {
+    return (
+        <Suspense fallback={<div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>}>
+            <SuccessContent />
+        </Suspense>
     )
 }
