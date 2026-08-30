@@ -32,10 +32,10 @@ model Order {
 model User {
   id              Int       @id @default(autoincrement())
   phone           String    @unique
-  password        String
   name            String?
-  resetCode       String?
-  resetCodeExpiry DateTime?
+  loginCode       String?
+  loginCodeExpiry DateTime?
+  createdAt       DateTime  @default(now())
   orders          Order[]
 }
 
