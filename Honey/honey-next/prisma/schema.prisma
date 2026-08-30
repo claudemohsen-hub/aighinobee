@@ -62,6 +62,7 @@ model Product {
   benefits    String?
   suitableFor String?
   isActive    Boolean  @default(true)
+  inStock     Boolean  @default(true)
   createdAt   DateTime @default(now())
   images      ProductImage[]
 }
