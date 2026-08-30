@@ -1,377 +1,261 @@
-"use client";
+"use client"
+import { useState, useEffect } from "react"
 
-import { FormEvent, useEffect, useState } from "react";
-
-type Representative = {
-  id: number;
-  province: string;
-  city: string;
-  name: string;
-  phone: string;
-  address: string;
-  description?: string | null;
-};
-
-const emptyForm = {
-  province: "",
-  city: "",
-  name: "",
-  phone: "",
-  address: "",
-  description: "",
-};
+const EMPTY_FORM = {
+    id: null as number | null,
+    province: "",
+    city: "",
+    name: "",
+    phone: "",
+    address: "",
+    description: "",
+}
 
 export default function AdminRepresentativesPage() {
-  const [items, setItems] = useState<Representative[]>([]);
-  const [form, setForm] = useState(emptyForm);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+    const [reps, setReps] = useState<any[]>([])
+    const [password, setPassword] = useState("")
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [checkingSession, setCheckingSession] = useState(true)
+    const [form, setForm] = useState(EMPTY_FORM)
+    const [saving, setSaving] = useState(false)
 
-  async function loadRepresentatives() {
-    setLoading(true);
+    const ADMIN_PASSWORD_KEY = "adminPassword"
+    const ADMIN_SESSION_KEY = "adminLoggedIn"
+    const DEFAULT_PASSWORD = "1234"
 
-    try {
-      const response = await fetch("/api/representatives");
-      const data = await response.json();
-
-      setItems(Array.isArray(data) ? data : []);
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
+    function getStoredPassword() {
+        if (typeof window === "undefined") return DEFAULT_PASSWORD
+        return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD
     }
-  }
 
-  useEffect(() => {
-    loadRepresentatives();
-  }, []);
+    useEffect(() => {
+        const session = localStorage.getItem(ADMIN_SESSION_KEY)
+        if (session === "true") setIsLoggedIn(true)
+        setCheckingSession(false)
+    }, [])
 
-  function updateField(
-    field: keyof typeof emptyForm,
-    value: string
-  ) {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  }
+    useEffect(() => {
+        if (isLoggedIn) fetchReps()
+    }, [isLoggedIn])
 
-  function startEdit(item: Representative) {
-    setEditingId(item.id);
+    function fetchReps() {
+        fetch("/api/representatives")
+            .then((res) => res.json())
+            .then((data) => setReps(Array.isArray(data) ? data : []))
+    }
 
-    setForm({
-      province: item.province,
-      city: item.city,
-      name: item.name,
-      phone: item.phone,
-      address: item.address,
-      description: item.description ?? "",
-    });
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  function resetForm() {
-    setEditingId(null);
-    setForm(emptyForm);
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setSaving(true);
-
-    try {
-      const response = await fetch(
-        editingId
-          ? `/api/representatives/${editingId}`
-          : "/api/representatives",
-        {
-          method: editingId ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
+    function handleLogin() {
+        if (password === getStoredPassword()) {
+            setIsLoggedIn(true)
+            localStorage.setItem(ADMIN_SESSION_KEY, "true")
+        } else {
+            alert("رمز عبور اشتباه است")
         }
-      );
-
-      if (!response.ok) {
-        alert("ذخیره اطلاعات انجام نشد.");
-        return;
-      }
-
-      resetForm();
-      await loadRepresentatives();
-    } catch {
-      alert("خطایی در ارتباط با سرور رخ داد.");
-    } finally {
-      setSaving(false);
     }
-  }
 
-  async function deleteRepresentative(id: number) {
-    const confirmed = confirm(
-      "آیا از حذف این نماینده مطمئن هستید؟"
-    );
+    function resetForm() {
+        setForm(EMPTY_FORM)
+    }
 
-    if (!confirmed) return;
+    function startEdit(rep: any) {
+        setForm({
+            id: rep.id,
+            province: rep.province,
+            city: rep.city,
+            name: rep.name,
+            phone: rep.phone,
+            address: rep.address,
+            description: rep.description || "",
+        })
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
 
-    try {
-      const response = await fetch(
-        `/api/representatives/${id}`,
-        {
-          method: "DELETE",
+    async function handleSave() {
+        if (!form.province.trim() || !form.city.trim() || !form.name.trim() || !form.phone.trim() || !form.address.trim()) {
+            alert("استان، شهر، نام، شماره و آدرس الزامی است")
+            return
         }
-      );
 
-      if (!response.ok) {
-        alert("حذف نماینده انجام نشد.");
-        return;
-      }
+        setSaving(true)
+        const method = form.id ? "PUT" : "POST"
+        const body = form.id ? form : { ...form }
 
-      await loadRepresentatives();
-    } catch {
-      alert("خطایی در ارتباط با سرور رخ داد.");
+        const res = await fetch("/api/representatives", {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        })
+        const data = await res.json()
+        setSaving(false)
+
+        if (data.success) {
+            resetForm()
+            fetchReps()
+        } else {
+            alert("خطا: " + (data.message || "نامشخص"))
+        }
     }
-  }
 
-  return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6"
-    >
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8">
-          <p className="text-sm font-bold text-amber-600">
-            مدیریت سایت
-          </p>
+    async function handleDelete(id: number, name: string) {
+        if (!confirm(`آیا از حذف نماینده «${name}» مطمئن هستید؟`)) return
 
-          <h1 className="mt-2 text-3xl font-black text-slate-900">
-            مدیریت نمایندگان فروش
-          </h1>
+        const res = await fetch("/api/representatives", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+        })
+        const data = await res.json()
+        if (data.success) {
+            fetchReps()
+        } else {
+            alert("خطا: " + (data.message || "نامشخص"))
+        }
+    }
 
-          <p className="mt-2 text-sm text-slate-500">
-            نمایندگان فروش را اضافه، ویرایش یا حذف کنید.
-          </p>
-        </header>
+    if (checkingSession) return null
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="mb-10 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
-        >
-          <div className="mb-7 flex items-center justify-between gap-4">
-            <h2 className="text-xl font-black text-slate-900">
-              {editingId
-                ? "ویرایش نماینده"
-                : "افزودن نماینده جدید"}
-            </h2>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200"
-              >
-                لغو ویرایش
-              </button>
-            )}
-          </div>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <label>
-              <span className="mb-2 block text-sm font-bold">
-                استان
-              </span>
-
-              <input
-                required
-                value={form.province}
-                onChange={(e) =>
-                  updateField("province", e.target.value)
-                }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="مثلاً تهران"
-              />
-            </label>
-
-            <label>
-              <span className="mb-2 block text-sm font-bold">
-                شهر
-              </span>
-
-              <input
-                required
-                value={form.city}
-                onChange={(e) =>
-                  updateField("city", e.target.value)
-                }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="مثلاً تهران"
-              />
-            </label>
-
-            <label>
-              <span className="mb-2 block text-sm font-bold">
-                نام نماینده
-              </span>
-
-              <input
-                required
-                value={form.name}
-                onChange={(e) =>
-                  updateField("name", e.target.value)
-                }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="نام و نام خانوادگی"
-              />
-            </label>
-
-            <label>
-              <span className="mb-2 block text-sm font-bold">
-                شماره تماس
-              </span>
-
-              <input
-                required
-                type="tel"
-                value={form.phone}
-                onChange={(e) =>
-                  updateField("phone", e.target.value)
-                }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="0912..."
-              />
-            </label>
-
-            <label className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-bold">
-                آدرس
-              </span>
-
-              <input
-                required
-                value={form.address}
-                onChange={(e) =>
-                  updateField("address", e.target.value)
-                }
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="آدرس کامل نماینده"
-              />
-            </label>
-
-            <label className="sm:col-span-2 lg:col-span-3">
-              <span className="mb-2 block text-sm font-bold">
-                توضیحات
-              </span>
-
-              <textarea
-                value={form.description}
-                onChange={(e) =>
-                  updateField("description", e.target.value)
-                }
-                rows={3}
-                className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-amber-400 focus:bg-white"
-                placeholder="توضیحات اختیاری"
-              />
-            </label>
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-2xl bg-slate-900 px-7 py-3 font-bold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving
-                ? "در حال ذخیره..."
-                : editingId
-                ? "ذخیره تغییرات"
-                : "افزودن نماینده"}
-            </button>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-2xl bg-slate-100 px-6 py-3 font-bold text-slate-700"
-              >
-                انصراف
-              </button>
-            )}
-          </div>
-        </form>
-
-        {/* List */}
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 p-5 sm:p-6">
-            <h2 className="text-xl font-black">
-              فهرست نمایندگان
-            </h2>
-          </div>
-
-          {loading ? (
-            <div className="p-10 text-center text-slate-500">
-              در حال دریافت اطلاعات...
-            </div>
-          ) : items.length === 0 ? (
-            <div className="p-10 text-center text-slate-500">
-              هنوز نماینده‌ای ثبت نشده است.
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between"
+    if (!isLoggedIn) {
+        return (
+            <div className="p-6 max-w-sm mx-auto">
+                <h1 className="text-2xl font-bold mb-4 text-amber-200">ورود به پنل مدیریت</h1>
+                <input
+                    type="password"
+                    placeholder="رمز عبور"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+                />
+                <button
+                    onClick={handleLogin}
+                    className="bg-amber-800 text-white px-6 py-3 rounded-lg w-full hover:bg-amber-900 transition"
                 >
-                  <div>
-                    <div className="font-black text-slate-900">
-                      {item.name}
-                    </div>
-
-                    <div className="mt-1 text-sm text-amber-600">
-                      {item.province}، {item.city}
-                    </div>
-
-                    <div className="mt-2 text-sm text-slate-500">
-                      📞 {item.phone}
-                    </div>
-
-                    <div className="mt-1 text-sm leading-6 text-slate-400">
-                      📍 {item.address}
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => startEdit(item)}
-                      className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 hover:bg-amber-100"
-                    >
-                      ویرایش
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        deleteRepresentative(item.id)
-                      }
-                      className="rounded-xl bg-red-50 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-100"
-                    >
-                      حذف
-                    </button>
-                  </div>
-                </div>
-              ))}
+                    ورود
+                </button>
             </div>
-          )}
-        </section>
-      </div>
-    </main>
-  );
+        )
+    }
+
+    const inputClass = "border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
+
+    return (
+        <div className="p-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-amber-200 mb-6">مدیریت نمایندگان فروش</h1>
+
+            <div className="bg-white rounded-xl shadow-md p-5 mb-8 text-black">
+                <h2 className="font-bold text-lg mb-4">{form.id ? "ویرایش نماینده" : "افزودن نماینده جدید"}</h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label className="text-sm font-semibold block mb-1">استان *</label>
+                        <input
+                            type="text"
+                            value={form.province}
+                            onChange={(e) => setForm({ ...form, province: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold block mb-1">شهر *</label>
+                        <input
+                            type="text"
+                            value={form.city}
+                            onChange={(e) => setForm({ ...form, city: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold block mb-1">نام نماینده *</label>
+                        <input
+                            type="text"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-semibold block mb-1">شماره تماس *</label>
+                        <input
+                            type="text"
+                            dir="ltr"
+                            value={form.phone}
+                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-sm font-semibold block mb-1">آدرس *</label>
+                        <textarea
+                            rows={2}
+                            value={form.address}
+                            onChange={(e) => setForm({ ...form, address: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-sm font-semibold block mb-1">توضیحات (اختیاری)</label>
+                        <textarea
+                            rows={2}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            className={inputClass}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex gap-3 mt-5">
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition disabled:opacity-50"
+                    >
+                        {saving ? "در حال ذخیره..." : form.id ? "ذخیره تغییرات" : "افزودن"}
+                    </button>
+                    {form.id && (
+                        <button
+                            onClick={resetForm}
+                            className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 transition"
+                        >
+                            انصراف از ویرایش
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <h2 className="font-bold text-amber-200 mb-4">لیست نمایندگان ({reps.length})</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {reps.map((rep) => (
+                    <div key={rep.id} className="bg-white rounded-xl shadow-md p-4 text-black">
+                        <div className="flex justify-between items-start mb-2">
+                            <p className="font-bold">{rep.name}</p>
+                            <span className="text-xs bg-amber-100 text-amber-900 px-2 py-1 rounded">
+                                {rep.province} - {rep.city}
+                            </span>
+                        </div>
+                        <p className="text-sm" dir="ltr">{rep.phone}</p>
+                        <p className="text-sm text-gray-600 mt-1">{rep.address}</p>
+                        {rep.description && <p className="text-xs text-gray-500 mt-1">{rep.description}</p>}
+                        <div className="flex gap-2 mt-3">
+                            <button
+                                onClick={() => startEdit(rep)}
+                                className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-blue-700 transition flex-1"
+                            >
+                                ویرایش
+                            </button>
+                            <button
+                                onClick={() => handleDelete(rep.id, rep.name)}
+                                className="bg-red-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-red-700 transition flex-1"
+                            >
+                                حذف
+                            </button>
+                        </div>
+                    </div>
+                ))}
+
+                {reps.length === 0 && (
+                    <p className="text-gray-300 col-span-full text-center py-10">هنوز نماینده‌ای ثبت نشده</p>
+                )}
+            </div>
+        </div>
+    )
 }
