@@ -15,6 +15,7 @@ const EMPTY_FORM = {
     expiry: "",
     benefits: "",
     suitableFor: "",
+    inStock: true,
 }
 
 export default function AdminProductsPage() {
@@ -82,6 +83,7 @@ export default function AdminProductsPage() {
             expiry: product.expiry || "",
             benefits: product.benefits || "",
             suitableFor: product.suitableFor || "",
+            inStock: product.inStock !== undefined ? product.inStock : true,
         })
         setImages(product.images.map((img: any) => ({ url: img.url, filename: img.filename, alt: img.alt })))
         setShowForm(true)
@@ -152,6 +154,34 @@ export default function AdminProductsPage() {
         if (data.success) fetchProducts()
     }
 
+    async function toggleStock(product: any) {
+        const res = await fetch("/api/products", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                shortDesc: product.shortDesc,
+                description: product.description,
+                weight: product.weight,
+                honeyType: product.honeyType,
+                productYear: product.productYear,
+                expiry: product.expiry,
+                benefits: product.benefits,
+                suitableFor: product.suitableFor,
+                isActive: product.isActive,
+                inStock: !product.inStock,
+            }),
+        })
+        const data = await res.json()
+        if (data.success) {
+            fetchProducts()
+        } else {
+            alert("خطا: " + (data.message || "نامشخص"))
+        }
+    }
+
     if (checkingSession) return null
 
     if (!isLoggedIn) {
@@ -211,6 +241,19 @@ export default function AdminProductsPage() {
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="inStock"
+                            checked={form.inStock}
+                            onChange={(e) => setForm({ ...form, inStock: e.target.checked })}
+                            className="w-5 h-5"
+                        />
+                        <label htmlFor="inStock" className="text-sm font-semibold">
+                            این محصول موجود است
+                        </label>
                     </div>
 
                     <div className="mt-4">
@@ -358,19 +401,36 @@ export default function AdminProductsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map((product) => (
                     <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden text-black">
-                        {product.images?.[0] ? (
-                            <img src={product.images[0].url} alt={product.name} className="w-full h-40 object-cover" />
-                        ) : (
-                            <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
-                                بدون تصویر
-                            </div>
-                        )}
+                        <div className="relative">
+                            {product.images?.[0] ? (
+                                <img src={product.images[0].url} alt={product.name} className="w-full h-40 object-cover" />
+                            ) : (
+                                <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
+                                    بدون تصویر
+                                </div>
+                            )}
+                            {!product.inStock && (
+                                <span className="absolute top-2 right-2 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded">
+                                    ناموجود
+                                </span>
+                            )}
+                        </div>
                         <div className="p-4">
                             <p className="font-bold">{product.name}</p>
                             <p className="text-sm text-amber-800 font-semibold mt-1">
                                 {product.price.toLocaleString("fa-IR")} تومان
                             </p>
-                            <div className="flex gap-2 mt-3">
+                            <button
+                                onClick={() => toggleStock(product)}
+                                className={`text-xs px-3 py-1.5 rounded-lg w-full mt-3 transition ${
+                                    product.inStock
+                                        ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                                        : "bg-green-100 text-green-800 hover:bg-green-200"
+                                }`}
+                            >
+                                {product.inStock ? "علامت‌گذاری به‌عنوان ناموجود" : "علامت‌گذاری به‌عنوان موجود"}
+                            </button>
+                            <div className="flex gap-2 mt-2">
                                 <button
                                     onClick={() => startEdit(product)}
                                     className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-blue-700 transition flex-1"

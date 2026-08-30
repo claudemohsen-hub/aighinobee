@@ -33,6 +33,7 @@ export async function POST(request: Request) {
                 expiry: data.expiry || null,
                 benefits: data.benefits || null,
                 suitableFor: data.suitableFor || null,
+                inStock: data.inStock !== undefined ? data.inStock : true,
                 images: data.images?.length ? {
                     create: data.images.map((img: any, index: number) => ({
                         url: img.url,
@@ -75,10 +76,10 @@ export async function PUT(request: Request) {
                 benefits: data.benefits || null,
                 suitableFor: data.suitableFor || null,
                 isActive: data.isActive !== undefined ? data.isActive : true,
+                inStock: data.inStock !== undefined ? data.inStock : true,
             },
         })
 
-        // آپدیت تصاویر: حذف قبلی‌ها و اضافه‌ی جدید
         if (data.images) {
             await prisma.productImage.deleteMany({ where: { productId: product.id } })
             if (data.images.length > 0) {
@@ -115,7 +116,6 @@ export async function DELETE(request: Request) {
             return Response.json({ success: false, message: "شناسه محصول الزامی است" }, { status: 400 })
         }
 
-        // دریافت تصاویر برای حذف از storage
         const product = await prisma.product.findUnique({
             where: { id: Number(data.id) },
             include: { images: true },
@@ -125,7 +125,6 @@ export async function DELETE(request: Request) {
             return Response.json({ success: false, message: "محصول یافت نشد" }, { status: 404 })
         }
 
-        // حذف فایل‌های تصویر از storage
         for (const img of product.images) {
             if (img.filename) {
                 try {
@@ -143,7 +142,6 @@ export async function DELETE(request: Request) {
             }
         }
 
-        // حذف محصول (تصاویر هم cascade حذف می‌شن)
         await prisma.product.delete({ where: { id: Number(data.id) } })
 
         return Response.json({ success: true, message: "محصول حذف شد" })

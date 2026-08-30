@@ -6,7 +6,6 @@ export async function POST(request: Request) {
     try {
         const data = await request.json()
 
-        // همان اعتبارسنجی‌های سفارش قبلی
         if (!Array.isArray(data.cart) || data.cart.length === 0) {
             return Response.json({ success: false, message: "سبد خرید خالی است" }, { status: 400 })
         }
@@ -29,10 +28,24 @@ export async function POST(request: Request) {
             return Response.json({ success: false, message: "مبلغ سفارش نامعتبر است" }, { status: 400 })
         }
 
+        // چک موجودی سمت سرور — حتی اگه کاربر با ترفند فنی دکمه‌ی غیرفعال رو دور بزنه
+        const productIds = data.cart.map((item: any) => item.id).filter((id: any) => typeof id === "number")
+        const products = await prisma.product.findMany({ where: { id: { in: productIds } } })
+
+        for (const item of data.cart) {
+            const product = products.find((p) => p.id === item.id)
+            if (!product) continue // محصولات قدیمی که آی‌دی عددی ندارن رد می‌شن
+            if (!product.inStock) {
+                return Response.json(
+                    { success: false, message: `متأسفانه محصول «${product.name}» ناموجود است` },
+                    { status: 400 }
+                )
+            }
+        }
+
         const cookieStore = await cookies()
         const userId = cookieStore.get("userId")?.value
 
-        // سفارش را با وضعیت «پرداخت نشده» می‌سازیم
         const order = await prisma.order.create({
             data: {
                 userId: userId ? Number(userId) : null,
@@ -68,7 +81,6 @@ export async function POST(request: Request) {
             )
         }
 
-        // authority را روی سفارش ذخیره می‌کنیم تا در verify پیدایش کنیم
         await prisma.order.update({
             where: { id: order.id },
             data: { authority: result.authority },
