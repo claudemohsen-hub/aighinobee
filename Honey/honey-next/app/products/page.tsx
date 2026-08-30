@@ -1,135 +1,106 @@
 "use client"
 import { useEffect, useState, useContext } from "react"
-import { useParams } from "next/navigation"
-import { CartContextValue } from "../../../Context/CartContext"
+import Link from "next/link"
+import { CartContextValue } from "../../Context/CartContext"
 
-export default function ProductDetail() {
-    const params = useParams()
-    const { addToCart } = useContext(CartContextValue) as any
-    const [product, setProduct] = useState<any>(null)
+export default function ProductsPage() {
+    const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [activeImage, setActiveImage] = useState(0)
+    const { addToCart } = useContext(CartContextValue) as any
 
     useEffect(() => {
-        fetch(`/api/products/${params.id}`)
+        fetch("/api/products")
             .then((res) => res.json())
             .then((data) => {
-                if (data && !data.message) setProduct(data)
+                setProducts(Array.isArray(data) ? data.filter((p) => p.isActive !== false) : [])
                 setLoading(false)
             })
             .catch(() => setLoading(false))
-    }, [params.id])
+    }, [])
 
-    if (loading) return <div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>
-    if (!product) return <div className="p-6 text-center text-amber-200">محصول پیدا نشد</div>
+    if (loading) {
+        return <div className="p-6 text-center text-amber-200">در حال بارگذاری محصولات...</div>
+    }
 
-    const images = product.images?.length ? product.images : []
-    const inStock = product.inStock !== false
-
-    const specs = [
-        { label: "وزن", value: product.weight },
-        { label: "نوع عسل", value: product.honeyType },
-        { label: "سال تولید", value: product.productYear },
-        { label: "تاریخ انقضا", value: product.expiry },
-        { label: "خواص", value: product.benefits },
-        { label: "مناسب برای", value: product.suitableFor },
-    ].filter((s) => s.value)
+    if (products.length === 0) {
+        return <div className="p-6 text-center text-amber-200">هنوز محصولی ثبت نشده است</div>
+    }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-8">
-                <div className="md:w-1/2">
-                    <div className="relative rounded-xl overflow-hidden bg-white/5 border border-amber-900/30">
-                        {images.length > 0 ? (
-                            <div className="w-full h-80 flex items-center justify-center overflow-hidden">
-                                <img
-                                    src={images[activeImage].url}
-                                    alt={product.name}
-                                    className={`max-w-full max-h-full object-contain ${!inStock ? "opacity-50" : ""}`}
-                                />
-                            </div>
-                        ) : (
-                            <div className="w-full h-80 flex items-center justify-center text-amber-100">
-                                بدون تصویر
-                            </div>
-                        )}
-                        {!inStock && (
-                            <div className="absolute top-3 right-3 bg-red-700 text-white text-sm font-bold px-4 py-1.5 rounded-lg">
-                                ناموجود
-                            </div>
-                        )}
-                    </div>
-                    {images.length > 1 && (
-                        <div className="flex gap-2 mt-3 overflow-x-auto">
-                            {images.map((img: any, index: number) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setActiveImage(index)}
-                                    className={`shrink-0 rounded-lg overflow-hidden border-2 bg-white/5 w-16 h-16 flex items-center justify-center ${
-                                        activeImage === index ? "border-amber-500" : "border-transparent"
-                                    }`}
-                                >
-                                    <img src={img.url} alt="" className="max-w-full max-h-full object-contain" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="md:w-1/2 flex flex-col">
-                    <h1 className="text-2xl font-bold text-amber-200">{product.name}</h1>
-
-                    {product.shortDesc && (
-                        <p className="text-amber-50 mt-3 leading-7 whitespace-pre-line">{product.shortDesc}</p>
-                    )}
-
-                    <p className="text-2xl font-bold text-amber-100 mt-5">
-                        {product.price.toLocaleString("fa-IR")} تومان
-                    </p>
-
-                    {inStock ? (
-                        <button
-                            onClick={() => addToCart(product)}
-                            className="bg-amber-800 text-white px-6 py-3 rounded-lg mt-4 hover:bg-amber-900 transition font-semibold"
+        <div className="p-6 max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-amber-200 mb-6">محصولات</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => {
+                    const mainImage = product.images?.[0]?.url
+                    const inStock = product.inStock !== false
+                    return (
+                        <div
+                            key={product.id}
+                            className="bg-white/5 border border-amber-900/30 rounded-xl overflow-hidden flex flex-col"
                         >
-                            افزودن به سبد خرید
-                        </button>
-                    ) : (
-                        <button
-                            disabled
-                            className="bg-gray-500 text-white px-6 py-3 rounded-lg mt-4 font-semibold cursor-not-allowed opacity-70"
-                        >
-                            ناموجود
-                        </button>
-                    )}
-
-                    {product.description && (
-                        <div className="mt-6">
-                            <h2 className="font-bold text-amber-200 mb-2">توضیحات بیشتر</h2>
-                            <p className="text-amber-50 leading-7 whitespace-pre-line text-sm">{product.description}</p>
+                            <Link href={`/products/${product.id}`} className="relative block">
+                                {mainImage ? (
+                                    <div className="w-full h-52 flex items-center justify-center bg-white/5 overflow-hidden">
+                                        <img
+                                            src={mainImage}
+                                            alt={product.name}
+                                            className={`max-w-full max-h-full object-contain ${!inStock ? "opacity-50" : ""}`}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="w-full h-52 bg-white/10 flex items-center justify-center text-amber-100 text-sm">
+                                        بدون تصویر
+                                    </div>
+                                )}
+                                {!inStock && (
+                                    <span className="absolute top-2 right-2 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded">
+                                        ناموجود
+                                    </span>
+                                )}
+                            </Link>
+                            <div className="p-4 flex flex-col flex-1">
+                                <Link href={`/products/${product.id}`}>
+                                    <h2 className="font-bold text-amber-100 hover:text-amber-300 transition">
+                                        {product.name}
+                                    </h2>
+                                </Link>
+                                {product.weight && (
+                                    <p className="text-xs text-amber-300 mt-1">{product.weight}</p>
+                                )}
+                                {product.shortDesc && (
+                                    <p className="text-sm text-amber-50 mt-2 line-clamp-2">{product.shortDesc}</p>
+                                )}
+                                <p className="text-lg font-bold text-amber-100 mt-3">
+                                    {product.price.toLocaleString("fa-IR")} تومان
+                                </p>
+                                <div className="flex gap-2 mt-3">
+                                    <Link
+                                        href={`/products/${product.id}`}
+                                        className="flex-1 text-center bg-white/10 text-amber-100 text-sm px-3 py-2 rounded-lg hover:bg-white/20 transition"
+                                    >
+                                        مشاهده محصول
+                                    </Link>
+                                    {inStock ? (
+                                        <button
+                                            onClick={() => addToCart(product)}
+                                            className="flex-1 bg-amber-800 text-white text-sm px-3 py-2 rounded-lg hover:bg-amber-900 transition"
+                                        >
+                                            افزودن به سبد
+                                        </button>
+                                    ) : (
+                                        <button
+                                            disabled
+                                            className="flex-1 bg-gray-500 text-white text-sm px-3 py-2 rounded-lg cursor-not-allowed opacity-70"
+                                        >
+                                            ناموجود
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    )}
-                </div>
+                    )
+                })}
             </div>
-
-            {specs.length > 0 && (
-                <div className="mt-10">
-                    <h2 className="font-bold text-amber-200 text-lg mb-4 border-b border-amber-900/40 pb-2">
-                        ویژگی‌های محصول
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {specs.map((spec) => (
-                            <div
-                                key={spec.label}
-                                className="flex justify-between bg-white/5 border border-amber-900/30 rounded-lg px-4 py-3"
-                            >
-                                <span className="text-amber-300 text-sm font-semibold">{spec.label}</span>
-                                <span className="text-amber-50 text-sm">{spec.value}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
         </div>
     )
 }
