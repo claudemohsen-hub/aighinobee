@@ -1,4 +1,5 @@
 "use client"
+
 import { useEffect, useState, useContext } from "react"
 import { useParams } from "next/navigation"
 import { CartContextValue } from "../../../Context/CartContext"
@@ -20,8 +21,21 @@ export default function ProductDetail() {
             .catch(() => setLoading(false))
     }, [params.id])
 
-    if (loading) return <div className="p-6 text-center text-amber-200">در حال بارگذاری...</div>
-    if (!product) return <div className="p-6 text-center text-amber-200">محصول پیدا نشد</div>
+    if (loading) {
+        return (
+            <div className="p-6 text-center text-amber-200">
+                در حال بارگذاری...
+            </div>
+        )
+    }
+
+    if (!product) {
+        return (
+            <div className="p-6 text-center text-amber-200">
+                محصول پیدا نشد
+            </div>
+        )
+    }
 
     const images = product.images?.length ? product.images : []
 
@@ -33,6 +47,29 @@ export default function ProductDetail() {
         { label: "خواص", value: product.benefits },
         { label: "مناسب برای", value: product.suitableFor },
     ].filter((s) => s.value)
+
+    const productBenefits = [
+        {
+            icon: "✦",
+            title: "گارانتی بالاترین کیفیت",
+            subtitle: "انتخابی مطمئن برای یک تجربه متفاوت",
+        },
+        {
+            icon: "✓",
+            title: "ساکارز زیر یک درصد",
+            subtitle: "بدون هیچ افزودنی",
+        },
+        {
+            icon: "♥",
+            title: "برای اولین بار در ایران",
+            subtitle: "دارای مجوز سیب سلامت",
+        },
+        {
+            icon: "♛",
+            title: "خریدی با ارزش اجتماعی",
+            subtitle: "با خرید خود از زنان سرپرست خانوار حمایت کنید",
+        },
+    ]
 
     return (
         <div className="p-6 max-w-5xl mx-auto">
@@ -53,6 +90,7 @@ export default function ProductDetail() {
                             </div>
                         )}
                     </div>
+
                     {images.length > 1 && (
                         <div className="flex gap-2 mt-3 overflow-x-auto">
                             {images.map((img: any, index: number) => (
@@ -60,10 +98,16 @@ export default function ProductDetail() {
                                     key={index}
                                     onClick={() => setActiveImage(index)}
                                     className={`shrink-0 rounded-lg overflow-hidden border-2 bg-white/5 w-16 h-16 flex items-center justify-center ${
-                                        activeImage === index ? "border-amber-500" : "border-transparent"
+                                        activeImage === index
+                                            ? "border-amber-500"
+                                            : "border-transparent"
                                     }`}
                                 >
-                                    <img src={img.url} alt="" className="max-w-full max-h-full object-contain" />
+                                    <img
+                                        src={img.url}
+                                        alt=""
+                                        className="max-w-full max-h-full object-contain"
+                                    />
                                 </button>
                             ))}
                         </div>
@@ -71,10 +115,14 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="md:w-1/2 flex flex-col">
-                    <h1 className="text-2xl font-bold text-amber-200">{product.name}</h1>
+                    <h1 className="text-2xl font-bold text-amber-200">
+                        {product.name}
+                    </h1>
 
                     {product.shortDesc && (
-                        <p className="text-amber-50 mt-3 leading-7 whitespace-pre-line">{product.shortDesc}</p>
+                        <p className="text-amber-50 mt-3 leading-7 whitespace-pre-line">
+                            {product.shortDesc}
+                        </p>
                     )}
 
                     <p className="text-2xl font-bold text-amber-100 mt-5">
@@ -83,15 +131,44 @@ export default function ProductDetail() {
 
                     <button
                         onClick={() => addToCart(product)}
-                        className="bg-amber-800 text-white px-6 py-3 rounded-lg mt-4 hover:bg-amber-900 transition font-semibold"
+                        className="bg-amber-800 text-white px-6 py-3 rounded-lg mt-4 hover:bg-amber-900 transition font-semibold shadow-lg"
                     >
                         افزودن به سبد خرید
                     </button>
 
+                    {/* مزیت‌های کلیدی محصول */}
+                    <div className="mt-4 grid grid-cols-1 gap-2.5">
+                        {productBenefits.map((benefit, index) => (
+                            <div
+                                key={index}
+                                className="flex items-center gap-3 rounded-xl border border-amber-700/40 bg-amber-950/30 px-4 py-3 shadow-sm"
+                            >
+                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xl text-amber-300">
+                                    {benefit.icon}
+                                </span>
+
+                                <div>
+                                    <p className="text-sm font-bold text-amber-200">
+                                        {benefit.title}
+                                    </p>
+
+                                    <p className="text-xs text-amber-100/70 mt-0.5">
+                                        {benefit.subtitle}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
                     {product.description && (
                         <div className="mt-6">
-                            <h2 className="font-bold text-amber-200 mb-2">توضیحات بیشتر</h2>
-                            <p className="text-amber-50 leading-7 whitespace-pre-line text-sm">{product.description}</p>
+                            <h2 className="font-bold text-amber-200 mb-2">
+                                توضیحات بیشتر
+                            </h2>
+
+                            <p className="text-amber-50 leading-7 whitespace-pre-line text-sm">
+                                {product.description}
+                            </p>
                         </div>
                     )}
                 </div>
@@ -102,14 +179,20 @@ export default function ProductDetail() {
                     <h2 className="font-bold text-amber-200 text-lg mb-4 border-b border-amber-900/40 pb-2">
                         ویژگی‌های محصول
                     </h2>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {specs.map((spec) => (
                             <div
                                 key={spec.label}
                                 className="flex justify-between bg-white/5 border border-amber-900/30 rounded-lg px-4 py-3"
                             >
-                                <span className="text-amber-300 text-sm font-semibold">{spec.label}</span>
-                                <span className="text-amber-50 text-sm">{spec.value}</span>
+                                <span className="text-amber-300 text-sm font-semibold">
+                                    {spec.label}
+                                </span>
+
+                                <span className="text-amber-50 text-sm">
+                                    {spec.value}
+                                </span>
                             </div>
                         ))}
                     </div>
