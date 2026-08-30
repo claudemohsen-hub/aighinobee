@@ -8,23 +8,25 @@ datasource db {
 }
 
 model Order {
-  id           Int      @id @default(autoincrement())
-  phone        String
-  address      String
-  province     String
-  city         String
-  postalCode   String
-  description  String?
-  items        Json
-  totalPrice   Int
-  createdAt    DateTime @default(now())
-  status       String   @default("در حال بررسی")
-  plate        String   @default("")
-  floor        String?
-  unit         String?
-  trackingCode String?
-  userId       Int?
-  user         User?    @relation(fields: [userId], references: [id])
+  id            Int      @id @default(autoincrement())
+  phone         String
+  address       String
+  province      String
+  city          String
+  postalCode    String
+  description   String?
+  items         Json
+  totalPrice    Int
+  createdAt     DateTime @default(now())
+  status        String   @default("در حال بررسی")
+  plate         String   @default("")
+  floor         String?
+  unit          String?
+  trackingCode  String?
+  userId        Int?
+  user          User?    @relation(fields: [userId], references: [id])
+  paymentStatus String   @default("پرداخت نشده")
+  authority     String?
 }
 
 model User {

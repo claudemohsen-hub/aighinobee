@@ -1,7 +1,12 @@
 "use client"
+
 import { useState, useEffect } from "react"
 
-type ImageItem = { url: string; filename: string; alt?: string }
+type ImageItem = {
+    url: string
+    filename: string
+    alt?: string
+}
 
 const EMPTY_FORM = {
     id: null as number | null,
@@ -24,7 +29,7 @@ export default function AdminProductsPage() {
     const [checkingSession, setCheckingSession] = useState(true)
     const [form, setForm] = useState(EMPTY_FORM)
     const [images, setImages] = useState<ImageItem[]>([])
-    const [uploading, setUploading] = useState(false)
+    const [imageUrl, setImageUrl] = useState("")
     const [saving, setSaving] = useState(false)
     const [showForm, setShowForm] = useState(false)
 
@@ -34,23 +39,48 @@ export default function AdminProductsPage() {
 
     function getStoredPassword() {
         if (typeof window === "undefined") return DEFAULT_PASSWORD
-        return localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_PASSWORD
+
+        return (
+            localStorage.getItem(ADMIN_PASSWORD_KEY) ||
+            DEFAULT_PASSWORD
+        )
     }
 
     useEffect(() => {
         const session = localStorage.getItem(ADMIN_SESSION_KEY)
-        if (session === "true") setIsLoggedIn(true)
+
+        if (session === "true") {
+            setIsLoggedIn(true)
+        }
+
         setCheckingSession(false)
     }, [])
 
     useEffect(() => {
-        if (isLoggedIn) fetchProducts()
+        if (isLoggedIn) {
+            fetchProducts()
+        }
     }, [isLoggedIn])
 
-    function fetchProducts() {
-        fetch("/api/products")
-            .then((res) => res.json())
-            .then((data) => setProducts(data))
+    async function fetchProducts() {
+        try {
+            const res = await fetch("/api/products")
+
+            if (!res.ok) {
+                throw new Error("خطا در دریافت محصولات")
+            }
+
+            const data = await res.json()
+
+            if (Array.isArray(data)) {
+                setProducts(data)
+            } else {
+                setProducts([])
+            }
+        } catch (error) {
+            console.error("FETCH PRODUCTS ERROR:", error)
+            alert("خطا در دریافت محصولات")
+        }
     }
 
     function handleLogin() {
@@ -65,14 +95,15 @@ export default function AdminProductsPage() {
     function resetForm() {
         setForm(EMPTY_FORM)
         setImages([])
+        setImageUrl("")
         setShowForm(false)
     }
 
     function startEdit(product: any) {
         setForm({
             id: product.id,
-            name: product.name,
-            price: String(product.price),
+            name: product.name || "",
+            price: String(product.price ?? ""),
             shortDesc: product.shortDesc || "",
             description: product.description || "",
             weight: product.weight || "",
@@ -82,44 +113,76 @@ export default function AdminProductsPage() {
             benefits: product.benefits || "",
             suitableFor: product.suitableFor || "",
         })
-        setImages(product.images.map((img: any) => ({ url: img.url, filename: img.filename, alt: img.alt })))
+
+        setImages(
+            Array.isArray(product.images)
+                ? product.images.map((img: any) => ({
+                      url: img.url,
+                      filename: img.filename || "",
+                      alt: img.alt || product.name || "",
+                  }))
+                : []
+        )
+
+        setImageUrl("")
         setShowForm(true)
-        window.scrollTo({ top: 0, behavior: "smooth" })
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        })
     }
 
-    async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-        const files = e.target.files
-        if (!files || files.length === 0) return
+    function addImageUrl() {
+        const url = imageUrl.trim()
 
-        setUploading(true)
-        for (const file of Array.from(files)) {
-            const formData = new FormData()
-            formData.append("file", file)
-            try {
-                const res = await fetch("/api/upload", { method: "POST", body: formData })
-                const data = await res.json()
-                if (data.success) {
-                    setImages((prev) => [...prev, { url: data.url, filename: data.filename, alt: form.name }])
-                } else {
-                    alert("خطا در آپلود: " + (data.message || "نامشخص"))
-                }
-            } catch (err) {
-                alert("خطا در آپلود تصویر")
-            }
+        if (!url) {
+            alert("لطفاً لینک تصویر را وارد کنید")
+            return
         }
-        setUploading(false)
-        e.target.value = ""
+
+        try {
+            new URL(url)
+        } catch {
+            alert("لینک تصویر معتبر نیست")
+            return
+        }
+
+        setImages((prev) => [
+            ...prev,
+            {
+                url,
+                filename: "",
+                alt: form.name || "تصویر محصول",
+            },
+        ])
+
+        setImageUrl("")
     }
 
     function removeImage(index: number) {
-        setImages((prev) => prev.filter((_, i) => i !== index))
+        setImages((prev) =>
+            prev.filter((_, i) => i !== index)
+        )
     }
 
     function moveImage(index: number, direction: -1 | 1) {
         const newIndex = index + direction
-        if (newIndex < 0 || newIndex >= images.length) return
+
+        if (
+            newIndex < 0 ||
+            newIndex >= images.length
+        ) {
+            return
+        }
+
         const copy = [...images]
-        ;[copy[index], copy[newIndex]] = [copy[newIndex], copy[index]]
+
+        ;[copy[index], copy[newIndex]] = [
+            copy[newIndex],
+            copy[index],
+        ]
+
         setImages(copy)
     }
 
@@ -129,55 +192,123 @@ export default function AdminProductsPage() {
             return
         }
 
+        const price = Number(form.price)
+
+        if (!Number.isFinite(price) || price <= 0) {
+            alert("قیمت محصول معتبر نیست")
+            return
+        }
+
         setSaving(true)
-        const payload = { ...form, images }
-        const method = form.id ? "PUT" : "POST"
-        const body = form.id ? { ...payload, id: form.id } : payload
 
-        const res = await fetch("/api/products", {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        })
-        const data = await res.json()
-        setSaving(false)
+        try {
+            const payload = {
+                ...form,
+                price,
+                images,
+            }
 
-        if (data.success) {
-            alert(form.id ? "محصول ویرایش شد" : "محصول اضافه شد")
-            resetForm()
-            fetchProducts()
-        } else {
-            alert("خطا: " + (data.message || "نامشخص"))
+            const method = form.id ? "PUT" : "POST"
+
+            const body = form.id
+                ? {
+                      ...payload,
+                      id: form.id,
+                  }
+                : payload
+
+            const res = await fetch("/api/products", {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(body),
+            })
+
+            const data = await res.json()
+
+            if (data.success) {
+                alert(
+                    form.id
+                        ? "محصول ویرایش شد"
+                        : "محصول اضافه شد"
+                )
+
+                resetForm()
+                fetchProducts()
+            } else {
+                alert(
+                    "خطا: " +
+                        (data.message || "خطای نامشخص")
+                )
+            }
+        } catch (error) {
+            console.error("SAVE PRODUCT ERROR:", error)
+            alert("خطا در ارتباط با سرور")
+        } finally {
+            setSaving(false)
         }
     }
 
-    async function handleDeleteProduct(id: number, name: string) {
-        if (!confirm(`آیا از حذف محصول «${name}» مطمئن هستید؟ تصاویرش هم از سرور حذف می‌شوند.`)) return
+    async function handleDeleteProduct(
+        id: number,
+        name: string
+    ) {
+        if (
+            !confirm(
+                `آیا از حذف محصول «${name}» مطمئن هستید؟`
+            )
+        ) {
+            return
+        }
 
-        const res = await fetch("/api/products", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        })
-        const data = await res.json()
-        alert(data.message)
-        if (data.success) fetchProducts()
+        try {
+            const res = await fetch("/api/products", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id }),
+            })
+
+            const data = await res.json()
+
+            alert(data.message)
+
+            if (data.success) {
+                fetchProducts()
+            }
+        } catch (error) {
+            console.error("DELETE PRODUCT ERROR:", error)
+            alert("خطا در حذف محصول")
+        }
     }
 
-    if (checkingSession) return null
+    if (checkingSession) {
+        return null
+    }
 
     if (!isLoggedIn) {
         return (
             <div className="p-6 max-w-sm mx-auto">
-                <h1 className="text-2xl font-bold mb-4 text-amber-200">ورود به پنل مدیریت</h1>
+                <h1 className="text-2xl font-bold mb-4 text-amber-200">
+                    ورود به پنل مدیریت
+                </h1>
+
                 <input
                     type="password"
                     placeholder="رمز عبور"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                    onChange={(e) =>
+                        setPassword(e.target.value)
+                    }
+                    onKeyDown={(e) =>
+                        e.key === "Enter" &&
+                        handleLogin()
+                    }
                     className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
                 />
+
                 <button
                     onClick={handleLogin}
                     className="bg-amber-800 text-white px-6 py-3 rounded-lg w-full hover:bg-amber-900 transition"
@@ -191,163 +322,362 @@ export default function AdminProductsPage() {
     return (
         <div className="p-6 max-w-6xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-amber-200">مدیریت محصولات</h1>
+                <h1 className="text-2xl font-bold text-amber-200">
+                    مدیریت محصولات
+                </h1>
+
                 <button
-                    onClick={() => (showForm ? resetForm() : setShowForm(true))}
+                    onClick={() =>
+                        showForm
+                            ? resetForm()
+                            : setShowForm(true)
+                    }
                     className="bg-amber-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-900 transition"
                 >
-                    {showForm ? "بستن فرم" : "+ افزودن محصول جدید"}
+                    {showForm
+                        ? "بستن فرم"
+                        : "+ افزودن محصول جدید"}
                 </button>
             </div>
 
             {showForm && (
                 <div className="bg-white rounded-xl shadow-md p-5 mb-8 text-black">
-                    <h2 className="font-bold text-lg mb-4">{form.id ? "ویرایش محصول" : "افزودن محصول جدید"}</h2>
+                    <h2 className="font-bold text-lg mb-4">
+                        {form.id
+                            ? "ویرایش محصول"
+                            : "افزودن محصول جدید"}
+                    </h2>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="text-sm font-semibold block mb-1">نام محصول *</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                نام محصول *
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        name: e.target.value,
+                                    })
+                                }
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div>
-                            <label className="text-sm font-semibold block mb-1">قیمت (تومان) *</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                قیمت (تومان) *
+                            </label>
+
                             <input
                                 type="number"
                                 value={form.price}
-                                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        price: e.target.value,
+                                    })
+                                }
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
                     </div>
 
                     <div className="mt-4">
-                        <label className="text-sm font-semibold block mb-1">ویژگی‌های کوتاه (حداکثر ۳ خط)</label>
+                        <label className="text-sm font-semibold block mb-1">
+                            ویژگی‌های کوتاه
+                            (حداکثر ۳ خط)
+                        </label>
+
                         <textarea
                             rows={3}
                             value={form.shortDesc}
-                            onChange={(e) => setForm({ ...form, shortDesc: e.target.value })}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    shortDesc: e.target.value,
+                                })
+                            }
                             className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             placeholder="مثلاً: عسل طبیعی، بدون افزودنی، برداشت مستقیم از کندو"
                         />
                     </div>
 
                     <div className="mt-4">
-                        <label className="text-sm font-semibold block mb-1">توضیحات بیشتر (حداکثر ۵ خط)</label>
+                        <label className="text-sm font-semibold block mb-1">
+                            توضیحات بیشتر
+                            (حداکثر ۵ خط)
+                        </label>
+
                         <textarea
                             rows={5}
                             value={form.description}
-                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    description:
+                                        e.target.value,
+                                })
+                            }
                             className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                         />
                     </div>
 
-                    <h3 className="font-bold mt-6 mb-2 text-amber-800">ویژگی‌های محصول</h3>
+                    <h3 className="font-bold mt-6 mb-2 text-amber-800">
+                        ویژگی‌های محصول
+                    </h3>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className="text-sm font-semibold block mb-1">وزن</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                وزن
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.weight}
-                                onChange={(e) => setForm({ ...form, weight: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        weight: e.target.value,
+                                    })
+                                }
                                 placeholder="مثلاً: 800 گرم"
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div>
-                            <label className="text-sm font-semibold block mb-1">نوع عسل</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                نوع عسل
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.honeyType}
-                                onChange={(e) => setForm({ ...form, honeyType: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        honeyType:
+                                            e.target.value,
+                                    })
+                                }
                                 placeholder="مثلاً: عسل عناب"
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div>
-                            <label className="text-sm font-semibold block mb-1">سال تولید</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                سال تولید
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.productYear}
-                                onChange={(e) => setForm({ ...form, productYear: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        productYear:
+                                            e.target.value,
+                                    })
+                                }
                                 placeholder="مثلاً: 1405"
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div>
-                            <label className="text-sm font-semibold block mb-1">تاریخ انقضا</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                تاریخ انقضا
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.expiry}
-                                onChange={(e) => setForm({ ...form, expiry: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        expiry: e.target.value,
+                                    })
+                                }
                                 placeholder="مثلاً: بدون انقضا"
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div className="sm:col-span-2">
-                            <label className="text-sm font-semibold block mb-1">خواص</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                خواص
+                            </label>
+
                             <textarea
                                 rows={2}
                                 value={form.benefits}
-                                onChange={(e) => setForm({ ...form, benefits: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        benefits:
+                                            e.target.value,
+                                    })
+                                }
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
+
                         <div className="sm:col-span-2">
-                            <label className="text-sm font-semibold block mb-1">مناسب برای</label>
+                            <label className="text-sm font-semibold block mb-1">
+                                مناسب برای
+                            </label>
+
                             <input
                                 type="text"
                                 value={form.suitableFor}
-                                onChange={(e) => setForm({ ...form, suitableFor: e.target.value })}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        suitableFor:
+                                            e.target.value,
+                                    })
+                                }
                                 placeholder="مثلاً: میانسالان، افراد دیابتی"
                                 className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
                             />
                         </div>
                     </div>
 
-                    <h3 className="font-bold mt-6 mb-2 text-amber-800">تصاویر محصول</h3>
-                    <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        multiple
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className="mb-3"
-                    />
-                    {uploading && <p className="text-sm text-gray-500">در حال آپلود...</p>}
+                    <h3 className="font-bold mt-6 mb-2 text-amber-800">
+                        تصاویر محصول
+                    </h3>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                    <div className="flex gap-2">
+                        <input
+                            type="url"
+                            value={imageUrl}
+                            onChange={(e) =>
+                                setImageUrl(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault()
+                                    addImageUrl()
+                                }
+                            }}
+                            placeholder="https://example.com/image.jpg"
+                            className="border border-gray-300 rounded-lg p-2 w-full text-black bg-white"
+                        />
+
+                        <button
+                            type="button"
+                            onClick={addImageUrl}
+                            className="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-800 transition whitespace-nowrap"
+                        >
+                            افزودن تصویر
+                        </button>
+                    </div>
+
+                    <p className="text-xs text-gray-500 mt-2">
+                        لینک مستقیم تصویر را وارد کنید، مثلاً
+                        https://example.com/image.jpg
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                         {images.map((img, index) => (
-                            <div key={index} className="relative border rounded-lg overflow-hidden">
-                                <img src={img.url} alt="" className="w-full h-24 object-cover" />
+                            <div
+                                key={`${img.url}-${index}`}
+                                className="relative border rounded-lg overflow-hidden"
+                            >
+                                <img
+                                    src={img.url}
+                                    alt={
+                                        img.alt ||
+                                        form.name ||
+                                        "تصویر محصول"
+                                    }
+                                    className="w-full h-24 object-cover"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display =
+                                            "none"
+                                    }}
+                                />
+
                                 {index === 0 && (
                                     <span className="absolute top-1 right-1 bg-amber-800 text-white text-[10px] px-2 py-0.5 rounded">
                                         اصلی
                                     </span>
                                 )}
+
                                 <div className="flex justify-between bg-gray-100 p-1">
-                                    <button onClick={() => moveImage(index, -1)} className="text-xs px-1" title="بالا">↑</button>
-                                    <button onClick={() => moveImage(index, 1)} className="text-xs px-1" title="پایین">↓</button>
-                                    <button onClick={() => removeImage(index)} className="text-xs text-red-600 px-1">حذف</button>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            moveImage(
+                                                index,
+                                                -1
+                                            )
+                                        }
+                                        className="text-xs px-1"
+                                        title="بالا"
+                                    >
+                                        ↑
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            moveImage(
+                                                index,
+                                                1
+                                            )
+                                        }
+                                        className="text-xs px-1"
+                                        title="پایین"
+                                    >
+                                        ↓
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            removeImage(index)
+                                        }
+                                        className="text-xs text-red-600 px-1"
+                                    >
+                                        حذف
+                                    </button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">اولین تصویر به‌عنوان تصویر اصلی نمایش داده می‌شود. با فلش‌ها ترتیب را عوض کنید.</p>
+
+                    <p className="text-xs text-gray-500 mt-2">
+                        اولین تصویر به‌عنوان تصویر اصلی
+                        نمایش داده می‌شود. با فلش‌ها ترتیب
+                        تصاویر را تغییر دهید.
+                    </p>
 
                     <div className="flex gap-3 mt-6">
                         <button
+                            type="button"
                             onClick={handleSave}
                             disabled={saving}
                             className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition disabled:opacity-50"
                         >
-                            {saving ? "در حال ذخیره..." : form.id ? "ذخیره تغییرات" : "افزودن محصول"}
+                            {saving
+                                ? "در حال ذخیره..."
+                                : form.id
+                                ? "ذخیره تغییرات"
+                                : "افزودن محصول"}
                         </button>
-                        <button onClick={resetForm} className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 transition">
+
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="bg-gray-300 text-black px-6 py-2 rounded-lg hover:bg-gray-400 transition"
+                        >
                             انصراف
                         </button>
                     </div>
@@ -356,28 +686,55 @@ export default function AdminProductsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map((product) => (
-                    <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden text-black">
+                    <div
+                        key={product.id}
+                        className="bg-white rounded-xl shadow-md overflow-hidden text-black"
+                    >
                         {product.images?.[0] ? (
-                            <img src={product.images[0].url} alt={product.name} className="w-full h-40 object-cover" />
+                            <img
+                                src={product.images[0].url}
+                                alt={product.name}
+                                className="w-full h-40 object-cover"
+                            />
                         ) : (
                             <div className="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
                                 بدون تصویر
                             </div>
                         )}
+
                         <div className="p-4">
-                            <p className="font-bold">{product.name}</p>
-                            <p className="text-sm text-amber-800 font-semibold mt-1">
-                                {product.price.toLocaleString("fa-IR")} تومان
+                            <p className="font-bold">
+                                {product.name}
                             </p>
+
+                            <p className="text-sm text-amber-800 font-semibold mt-1">
+                                {Number(
+                                    product.price
+                                ).toLocaleString(
+                                    "fa-IR"
+                                )}{" "}
+                                تومان
+                            </p>
+
                             <div className="flex gap-2 mt-3">
                                 <button
-                                    onClick={() => startEdit(product)}
+                                    type="button"
+                                    onClick={() =>
+                                        startEdit(product)
+                                    }
                                     className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-blue-700 transition flex-1"
                                 >
                                     ویرایش
                                 </button>
+
                                 <button
-                                    onClick={() => handleDeleteProduct(product.id, product.name)}
+                                    type="button"
+                                    onClick={() =>
+                                        handleDeleteProduct(
+                                            product.id,
+                                            product.name
+                                        )
+                                    }
                                     className="bg-red-600 text-white text-sm px-3 py-1.5 rounded-lg hover:bg-red-700 transition flex-1"
                                 >
                                     حذف
@@ -388,7 +745,9 @@ export default function AdminProductsPage() {
                 ))}
 
                 {products.length === 0 && (
-                    <p className="text-gray-300 col-span-full text-center py-10">هنوز محصولی اضافه نشده</p>
+                    <p className="text-gray-300 col-span-full text-center py-10">
+                        هنوز محصولی اضافه نشده
+                    </p>
                 )}
             </div>
         </div>

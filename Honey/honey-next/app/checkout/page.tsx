@@ -5,7 +5,9 @@ import { CartContextValue } from "../../Context/CartContext"
 import { provincesAndCities } from "../../data/iranLocations"
 
 export default function Checkout() {
-    const { cart } = useContext(CartContextValue)
+    const { cart, increaseQuantity, decreaseQuantity, removeFromCart } = useContext(
+        CartContextValue
+    ) as any
     const [selectedProvince, setSelectedProvince] = useState("")
     const [selectedCity, setSelectedCity] = useState("")
     const [phone, setPhone] = useState("")
@@ -15,12 +17,12 @@ export default function Checkout() {
     const [unit, setUnit] = useState("")
     const [postalCode, setPostalCode] = useState("")
     const [description, setDescription] = useState("")
+    const [submitting, setSubmitting] = useState(false)
 
     const total = cart.reduce(
         (sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity,
         0
     )
-    const finalTotal = total
 
     function onlyDigits(setter: (v: string) => void) {
         return (e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value.replace(/[^0-9]/g, ""))
@@ -31,7 +33,6 @@ export default function Checkout() {
             alert("سبد خرید شما خالی است")
             return
         }
-
         if (!selectedProvince) {
             alert("لطفاً استان را انتخاب کنید")
             return
@@ -53,157 +54,221 @@ export default function Checkout() {
             return
         }
 
-        const response = await fetch("/api/order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                cart,
-                total: finalTotal,
-                phone,
-                address,
-                plate,
-                floor,
-                unit,
-                province: selectedProvince,
-                city: selectedCity,
-                postalCode,
-                description,
-            }),
-        })
+        setSubmitting(true)
+        try {
+            const response = await fetch("/api/payment/request", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    cart,
+                    total,
+                    phone,
+                    address,
+                    plate,
+                    floor,
+                    unit,
+                    province: selectedProvince,
+                    city: selectedCity,
+                    postalCode,
+                    description,
+                }),
+            })
 
-        const result = await response.json()
-        alert(result.message)
+            const result = await response.json()
+
+            if (result.success && result.paymentUrl) {
+                // کاربر به درگاه زرین‌پال منتقل می‌شود
+                window.location.href = result.paymentUrl
+            } else {
+                alert(result.message || "خطا در اتصال به درگاه پرداخت")
+                setSubmitting(false)
+            }
+        } catch (err) {
+            alert("خطا در ثبت سفارش، لطفاً دوباره تلاش کنید")
+            setSubmitting(false)
+        }
     }
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">پرداخت</h1>
+        <div className="p-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6 text-amber-200">تکمیل سفارش</h1>
 
-            <div className="max-w-md">
-                <select
-                    value={selectedProvince}
-                    onChange={(e) => setSelectedProvince(e.target.value)}
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                >
-                    <option value="">انتخاب استان</option>
-                    {Object.keys(provincesAndCities).map((province) => (
-                        <option key={province} value={province}>
-                            {province}
-                        </option>
-                    ))}
-                </select>
+            <div className="mb-8">
+                <h2 className="font-bold text-amber-200 mb-3">سبد خرید شما</h2>
 
-                <select
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                    disabled={!selectedProvince}
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                >
-                    <option value="">انتخاب شهر</option>
-                    {selectedProvince &&
-                        provincesAndCities[selectedProvince].map((city) => (
-                            <option key={city} value={city}>
-                                {city}
-                            </option>
+                {cart.length === 0 ? (
+                    <p className="text-amber-100 bg-white/5 border border-amber-900/30 rounded-xl p-6 text-center">
+                        سبد خرید شما خالی است
+                    </p>
+                ) : (
+                    <div className="space-y-3">
+                        {cart.map((item: any) => (
+                            <div
+                                key={item.id}
+                                className="flex items-center gap-3 bg-white/5 border border-amber-900/30 rounded-xl p-3"
+                            >
+                                {item.image ? (
+                                    <div className="w-16 h-16 shrink-0 flex items-center justify-center bg-white/5 rounded-lg overflow-hidden">
+                                        <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain" />
+                                    </div>
+                                ) : (
+                                    <div className="w-16 h-16 shrink-0 bg-white/10 rounded-lg flex items-center justify-center text-[10px] text-amber-100">
+                                        بدون تصویر
+                                    </div>
+                                )}
+
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-amber-100 truncate">{item.name}</p>
+                                    <p className="text-sm text-amber-300">
+                                        {item.price.toLocaleString("fa-IR")} تومان
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => increaseQuantity(item.id)}
+                                        className="w-8 h-8 rounded-lg bg-amber-800 text-white hover:bg-amber-900 transition flex items-center justify-center text-lg font-bold"
+                                    >
+                                        +
+                                    </button>
+                                    <span className="w-8 text-center text-amber-100 font-semibold">
+                                        {item.quantity}
+                                    </span>
+                                    <button
+                                        onClick={() => decreaseQuantity(item.id)}
+                                        className="w-8 h-8 rounded-lg bg-amber-800 text-white hover:bg-amber-900 transition flex items-center justify-center text-lg font-bold"
+                                    >
+                                        −
+                                    </button>
+                                    <button
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="w-8 h-8 rounded-lg bg-red-700 text-white hover:bg-red-800 transition flex items-center justify-center"
+                                    >
+                                        🗑
+                                    </button>
+                                </div>
+
+                                <div className="w-28 text-left shrink-0 hidden sm:block">
+                                    <p className="text-amber-100 font-semibold text-sm">
+                                        {(item.price * item.quantity).toLocaleString("fa-IR")}
+                                    </p>
+                                    <p className="text-[11px] text-amber-300">تومان</p>
+                                </div>
+                            </div>
                         ))}
-                </select>
 
-                <textarea
-                    placeholder="آدرس کامل خود را وارد کنید"
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                    rows={3}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                />
-
-                <div className="flex gap-2 mb-4">
-                    <input
-                        type="text"
-                        placeholder="پلاک"
-                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
-                        value={plate}
-                        onChange={onlyDigits(setPlate)}
-                        maxLength={4}
-                    />
-                    <input
-                        type="text"
-                        placeholder="طبقه"
-                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
-                        value={floor}
-                        onChange={onlyDigits(setFloor)}
-                        maxLength={3}
-                    />
-                    <input
-                        type="text"
-                        placeholder="واحد"
-                        className="border border-gray-300 rounded-lg p-3 w-full text-center"
-                        value={unit}
-                        onChange={onlyDigits(setUnit)}
-                        maxLength={3}
-                    />
-                </div>
-
-                <input
-                    type="tel"
-                    placeholder="شماره موبایل (مثال: 09123456789)"
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                    value={phone}
-                    onChange={onlyDigits(setPhone)}
-                    maxLength={11}
-                />
-
-                <input
-                    type="text"
-                    placeholder="کد پستی"
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                    value={postalCode}
-                    onChange={onlyDigits(setPostalCode)}
-                    maxLength={10}
-                />
-
-                <textarea
-                    placeholder="توضیحات اختیاری"
-                    className="border border-gray-300 rounded-lg p-3 w-full mb-4"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
+                        <div className="bg-white/5 border border-amber-900/30 rounded-xl p-4 mt-4">
+                            <div className="flex justify-between font-bold text-amber-100">
+                                <span>جمع کل</span>
+                                <span>{total.toLocaleString("fa-IR")} تومان</span>
+                            </div>
+                            <p className="text-sm text-amber-300 mt-2">ارسال با تیپاکس بصورت پس‌کرایه</p>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {cart.length === 0 && <p>سبد خرید خالی است</p>}
-
-            {cart.map(
-                (
-                    item: { name: string; price: number; quantity: number },
-                    index: number
-                ) => (
-                    <div
-                        key={index}
-                        className="flex justify-between items-center border-b py-3"
-                    >
-                        <span>{item.name} ({item.quantity})</span>
-                        <span>
-                            {(item.price * item.quantity).toLocaleString("fa-IR")} تومان
-                        </span>
-                    </div>
-                )
-            )}
-
             {cart.length > 0 && (
-                <div>
-                    <div className="mt-5 font-bold">
-                        جمع کل: {total.toLocaleString("fa-IR")} تومان
-                    </div>
-                    <div className="mt-6 font-normal text-amber-200">
-                        ارسال با تیپاکس بصورت پس‌کرایه
-                    </div>
+                <>
+                    <h2 className="font-bold text-amber-200 mb-3">اطلاعات ارسال</h2>
+                    <div className="max-w-md">
+                        <select
+                            value={selectedProvince}
+                            onChange={(e) => setSelectedProvince(e.target.value)}
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+                        >
+                            <option value="">انتخاب استان</option>
+                            {Object.keys(provincesAndCities).map((province) => (
+                                <option key={province} value={province}>
+                                    {province}
+                                </option>
+                            ))}
+                        </select>
 
-                    <button
-                        onClick={handlePayment}
-                        className="block bg-green-700 text-white px-6 py-3 rounded-lg mt-4 hover:bg-green-800 transition"
-                    >
-                        پرداخت
-                    </button>
-                </div>
+                        <select
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white"
+                            disabled={!selectedProvince}
+                            value={selectedCity}
+                            onChange={(e) => setSelectedCity(e.target.value)}
+                        >
+                            <option value="">انتخاب شهر</option>
+                            {selectedProvince &&
+                                provincesAndCities[selectedProvince].map((city) => (
+                                    <option key={city} value={city}>
+                                        {city}
+                                    </option>
+                                ))}
+                        </select>
+
+                        <textarea
+                            placeholder="آدرس کامل خود را وارد کنید"
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
+                            rows={3}
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                        />
+
+                        <div className="flex gap-2 mb-4">
+                            <input
+                                type="text"
+                                placeholder="پلاک"
+                                className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
+                                value={plate}
+                                onChange={onlyDigits(setPlate)}
+                                maxLength={4}
+                            />
+                            <input
+                                type="text"
+                                placeholder="طبقه"
+                                className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
+                                value={floor}
+                                onChange={onlyDigits(setFloor)}
+                                maxLength={3}
+                            />
+                            <input
+                                type="text"
+                                placeholder="واحد"
+                                className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
+                                value={unit}
+                                onChange={onlyDigits(setUnit)}
+                                maxLength={3}
+                            />
+                        </div>
+
+                        <input
+                            type="tel"
+                            placeholder="شماره موبایل (مثال: 09123456789)"
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
+                            value={phone}
+                            onChange={onlyDigits(setPhone)}
+                            maxLength={11}
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="کد پستی"
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
+                            value={postalCode}
+                            onChange={onlyDigits(setPostalCode)}
+                            maxLength={10}
+                        />
+
+                        <textarea
+                            placeholder="توضیحات اختیاری"
+                            className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+
+                        <button
+                            onClick={handlePayment}
+                            disabled={submitting}
+                            className="block w-full bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition disabled:opacity-50 font-semibold"
+                        >
+                            {submitting ? "در حال انتقال به درگاه پرداخت..." : "پرداخت و ثبت سفارش"}
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     )
