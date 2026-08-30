@@ -29,7 +29,7 @@ export default function RepresentativesPage() {
     }
 
     return (
-        <div className="p-6 max-w-2xl mx-auto">
+        <div className="p-6 max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold text-amber-200 mb-8 text-center">نمایندگان فروش</h1>
 
             {reps.length === 0 ? (
@@ -39,26 +39,15 @@ export default function RepresentativesPage() {
                     {reps.map((rep, index) => (
                         <div
                             key={rep.id}
-                            className={`py-5 ${index !== reps.length - 1 ? "border-b border-amber-100/10" : ""}`}
+                            className={`py-4 ${index !== reps.length - 1 ? "border-b border-amber-100/10" : ""}`}
                         >
-                            <p className="text-amber-200 font-bold text-sm mb-2">
-                                {toPersianNumber(index + 1)}. {rep.province} - {rep.city}
-                            </p>
                             <p className="text-amber-50 leading-8">
-                                نام نماینده: {rep.name}
-                            </p>
-                            <p className="text-amber-50 leading-8">
-                                آدرس: {rep.address}
-                            </p>
-                            <p className="leading-8">
-                                <span className="text-amber-50">شماره تماس: </span>
+                                <span className="text-amber-300 font-bold">{toPersianNumber(index + 1)}. </span>
+                                نام نماینده: {rep.name}، آدرس: {rep.address}، شماره تماس:{" "}
                                 <span className="text-amber-400 font-semibold" dir="ltr">
                                     {rep.phone}
                                 </span>
                             </p>
-                            {rep.description && (
-                                <p className="text-amber-200/60 text-sm mt-1">{rep.description}</p>
-                            )}
                         </div>
                     ))}
                 </div>
