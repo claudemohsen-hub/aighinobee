@@ -3,6 +3,7 @@
 import { useContext, useState } from "react"
 import { CartContextValue } from "../../Context/CartContext"
 import { provincesAndCities } from "../../data/iranLocations"
+import { onlyEnglishDigits } from "../../lib/digits"
 
 export default function Checkout() {
     const { cart, increaseQuantity, decreaseQuantity, removeFromCart } = useContext(
@@ -24,8 +25,9 @@ export default function Checkout() {
         0
     )
 
-    function onlyDigits(setter: (v: string) => void) {
-        return (e: React.ChangeEvent<HTMLInputElement>) => setter(e.target.value.replace(/[^0-9]/g, ""))
+    // هر عدد فارسی/عربی که تایپ شود، همان لحظه به انگلیسی تبدیل می‌شود
+    function digitsOnly(setter: (v: string) => void) {
+        return (e: React.ChangeEvent<HTMLInputElement>) => setter(onlyEnglishDigits(e.target.value))
     }
 
     async function handlePayment() {
@@ -77,7 +79,6 @@ export default function Checkout() {
             const result = await response.json()
 
             if (result.success && result.paymentUrl) {
-                // کاربر به درگاه زرین‌پال منتقل می‌شود
                 window.location.href = result.paymentUrl
             } else {
                 alert(result.message || "خطا در اتصال به درگاه پرداخت")
@@ -211,45 +212,50 @@ export default function Checkout() {
                         <div className="flex gap-2 mb-4">
                             <input
                                 type="text"
+                                inputMode="numeric"
                                 placeholder="پلاک"
                                 className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
                                 value={plate}
-                                onChange={onlyDigits(setPlate)}
+                                onChange={digitsOnly(setPlate)}
                                 maxLength={4}
                             />
                             <input
                                 type="text"
+                                inputMode="numeric"
                                 placeholder="طبقه"
                                 className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
                                 value={floor}
-                                onChange={onlyDigits(setFloor)}
+                                onChange={digitsOnly(setFloor)}
                                 maxLength={3}
                             />
                             <input
                                 type="text"
+                                inputMode="numeric"
                                 placeholder="واحد"
                                 className="border border-gray-300 rounded-lg p-3 w-full text-center text-black bg-white placeholder:text-gray-500"
                                 value={unit}
-                                onChange={onlyDigits(setUnit)}
+                                onChange={digitsOnly(setUnit)}
                                 maxLength={3}
                             />
                         </div>
 
                         <input
                             type="tel"
+                            inputMode="numeric"
                             placeholder="شماره موبایل (مثال: 09123456789)"
                             className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
                             value={phone}
-                            onChange={onlyDigits(setPhone)}
+                            onChange={digitsOnly(setPhone)}
                             maxLength={11}
                         />
 
                         <input
                             type="text"
+                            inputMode="numeric"
                             placeholder="کد پستی"
                             className="border border-gray-300 rounded-lg p-3 w-full mb-4 text-black bg-white placeholder:text-gray-500"
                             value={postalCode}
-                            onChange={onlyDigits(setPostalCode)}
+                            onChange={digitsOnly(setPostalCode)}
                             maxLength={10}
                         />
 
