@@ -45,6 +45,7 @@ export default function Navbar() {
                 <Link href="/" className="hover:text-amber-300 transition">خانه</Link>
                 <Link href="/products" className="hover:text-amber-300 transition">محصولات</Link>
                 <Link href="/contactus" className="hover:text-amber-300 transition">تماس با ما</Link>
+                <Link href="/contactus" className="hover:text-amber-300 transition">نمایندگی های مجاز فروش</Link>
                 <Link href="/cart" className="hover:text-amber-300 transition">
                     سبد خرید ({cart?.length || 0})
                 </Link>
